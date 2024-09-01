@@ -2,6 +2,7 @@ package com.anubhav_auth.bento.userInterface.onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(scope: CoroutineScope, onfinish: () -> Unit) {
+fun OnboardingScreen(scope: CoroutineScope, onFinish: () -> Unit) {
     val pagerState = rememberPagerState(
         pageCount = { 4 },
     )
@@ -71,9 +72,9 @@ fun OnboardingScreen(scope: CoroutineScope, onfinish: () -> Unit) {
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HorizontalPager(state = pagerState, modifier = Modifier, userScrollEnabled = false, ) { page: Int ->
+        HorizontalPager(state = pagerState, modifier = Modifier, userScrollEnabled = true, ) { page: Int ->
             OnboardingPage(pages[page], scope, pagerState){
-                onfinish()
+                onFinish()
             }
         }
     }
@@ -178,6 +179,27 @@ private fun OnboardingPage(
                     Text(text = "Get Started !!", fontSize = 18.sp)
 
                 }
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp),
+                    onClick = {
+                    },
+                    enabled = false,
+                    shape = RoundedCornerShape(9.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = Color.Transparent,
+                        disabledContentColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent
+                    )
+                ) {
+
+                }
+
+                Spacer(modifier = Modifier.height(21.dp))
             }
 
 

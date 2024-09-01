@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.anubhav_auth.bento" />
+                  <option name="mobileSdkAppId" value="1:526744004632:android:7eb7addd863190276dbb6d" />
+                  <option name="projectId" value="bento-8305b" />
+                  <option name="projectNumber" value="526744004632" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
