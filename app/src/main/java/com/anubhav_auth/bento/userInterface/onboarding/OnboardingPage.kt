@@ -1,11 +1,14 @@
 package com.anubhav_auth.bento.userInterface.onboarding
 
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,25 +27,29 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.anubhav_auth.bento.R
+import com.anubhav_auth.bento.authentication.AuthState
+import com.anubhav_auth.bento.authentication.AuthViewModel
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(scope: CoroutineScope, onFinish: () -> Unit) {
-    val pagerState = rememberPagerState(
-        pageCount = { 4 },
-    )
+fun OnboardingScreen(scope: CoroutineScope,onFinish: () -> Unit) {
 
     val pages = listOf(
         OnboardingPageData(
@@ -65,16 +72,65 @@ fun OnboardingScreen(scope: CoroutineScope, onFinish: () -> Unit) {
             description = "Real-time tracking of your order's delivery status.",
             imageResId = R.drawable.robot_delivery
         )
-
+    )
+    val pagerState = rememberPagerState(
+        pageCount = { pages.size },
     )
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HorizontalPager(state = pagerState, modifier = Modifier, userScrollEnabled = true, ) { page: Int ->
-            OnboardingPage(pages[page], scope, pagerState){
-                onFinish()
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier,
+            userScrollEnabled = false,
+        ) { page: Int ->
+            Box {
+                OnboardingPage(pages[page], scope, pagerState) {
+                    onFinish()
+                }
+                TopTracker(
+                    modifier = Modifier.align(alignment = Alignment.TopCenter),
+                    pages.size,
+                    pagerState,
+                    scope
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TopTracker(
+    modifier: Modifier = Modifier,
+    size: Int,
+    pagerState: PagerState,
+    scope: CoroutineScope
+) {
+    Column {
+        Spacer(
+            modifier = Modifier
+                .height(27.dp)
+        )
+        Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            for (i in 0 until size) {
+                Box(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(6.dp)
+                        .background(
+                            color = if (i <= pagerState.currentPage) Color.Black else Color.Gray,
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                        .clickable {
+                            scope.launch {
+                                pagerState.scrollToPage(i)
+                            }
+                        }
+                )
             }
         }
     }
@@ -91,14 +147,14 @@ private fun OnboardingPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(15.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = onboardingPageData.imageResId),
                 contentDescription = null,
-                modifier = Modifier.size(500.dp)
+                modifier = Modifier.size(501.dp)
             )
             Text(
                 text = onboardingPageData.title,
@@ -116,7 +172,7 @@ private fun OnboardingPage(
             )
         }
         Column(modifier = Modifier.align(Alignment.BottomCenter)) {
-            if (pagerState.currentPage < 3) {
+            if (pagerState.currentPage < pagerState.pageCount - 1) {
 
                 Button(
                     modifier = Modifier
@@ -134,7 +190,11 @@ private fun OnboardingPage(
                 ) {
                     Text(text = "Next", fontSize = 18.sp)
                     Spacer(modifier = Modifier.width(6.dp))
-                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -145,7 +205,7 @@ private fun OnboardingPage(
                         .height(45.dp),
                     onClick = {
                         scope.launch {
-                         pagerState.scrollToPage(4)
+                            pagerState.scrollToPage(4)
                         }
                     },
                     shape = RoundedCornerShape(9.dp),
@@ -159,7 +219,7 @@ private fun OnboardingPage(
 
                 Spacer(modifier = Modifier.height(21.dp))
 
-            }else{
+            } else {
 
                 Button(
                     modifier = Modifier

@@ -2,7 +2,6 @@ package com.anubhav_auth.bento
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,14 +18,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.anubhav_auth.bento.ui.theme.BentoTheme
-import com.anubhav_auth.bento.userInterface.authentication.AuthState
-import com.anubhav_auth.bento.userInterface.authentication.AuthViewModel
-import com.anubhav_auth.bento.userInterface.authentication.authtestui
+import com.anubhav_auth.bento.authentication.AuthState
+import com.anubhav_auth.bento.authentication.AuthViewModel
+import com.anubhav_auth.bento.authentication.OTPVerificationPage
+import com.anubhav_auth.bento.authentication.PhoneNumberEntryPage
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
 import com.anubhav_auth.bento.userInterface.testPage
 
@@ -43,6 +41,7 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val scope = rememberCoroutineScope()
+            val authState by authViewModel.authState.collectAsState()
 
             Scaffold { paddingVal ->
                 Box(
@@ -50,13 +49,10 @@ class MainActivity : ComponentActivity() {
                         .background(MaterialTheme.colorScheme.background)
                         .padding(paddingVal)
                 ) {
-                    val collectAsState by authViewModel.authState.collectAsState()
-                    var startDestination = "error"
 
-                    if (collectAsState is AuthState.Authenticated) {
-                        startDestination = "testPage"
-                    }else if (collectAsState is AuthState.Unauthenticated) {
-                        startDestination = "onboarding"
+                    val startDestination = when (authState) {
+                        is AuthState.Authenticated -> "homePage"
+                        else -> "onboarding"
                     }
 
 
@@ -67,14 +63,32 @@ class MainActivity : ComponentActivity() {
                             ErrorScreen()
                         }
                         composable("onboarding") {
-                            OnboardingScreen(scope){
+                            OnboardingScreen(scope) {
                                 navController.navigate("loginPage")
                             }
                         }
                         composable("loginPage") {
-                            authtestui(authViewModel = authViewModel, navController = navController)
+                            PhoneNumberEntryPage(authViewModel = authViewModel, navController = navController)
                         }
-                        composable("testPage") {
+                        composable("otpPage") {
+                                OTPVerificationPage(
+                                    navController = navController,
+                                    authViewModel = authViewModel
+                                )
+                        }
+                        composable("otpPage/{phoneNumber}") {
+                            val phoneNumber = it.arguments?.getString("phoneNumber")
+                            if (phoneNumber == null){
+                                navController.navigate("error")
+                            }else {
+                                OTPVerificationPage(
+                                    navController = navController,
+                                    phoneNumber = phoneNumber,
+                                    authViewModel = authViewModel
+                                )
+                            }
+                        }
+                        composable("homePage") {
                             testPage()
                         }
                     }
@@ -87,7 +101,9 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ErrorScreen() {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Red))
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Red)
+    )
 }

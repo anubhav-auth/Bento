@@ -1,9 +1,8 @@
-package com.anubhav_auth.bento.userInterface.authentication
+package com.anubhav_auth.bento.authentication
 
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
@@ -19,7 +18,7 @@ import kotlinx.coroutines.flow.update
 import java.util.concurrent.TimeUnit
 
 class AuthViewModel: ViewModel() {
-    val auth = FirebaseAuth.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     private var storedVerificationId: String? = null
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
@@ -29,11 +28,14 @@ class AuthViewModel: ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val authState = _authState.asStateFlow()
 
+
     init {
+
         checkAuthStatus()
     }
 
     private val callbacks = object:PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
+
         override fun onVerificationCompleted(credential: PhoneAuthCredential) {
             Log.d(tag, "onVerificationCompleted:$credential")
             signInWithPhoneAuthCredential(credential)
@@ -55,12 +57,8 @@ class AuthViewModel: ViewModel() {
             verificationId: String,
             token: PhoneAuthProvider.ForceResendingToken,
         ) {
-            // The SMS verification code has been sent to the provided phone number, we
-            // now need to ask the user to enter the code and then construct a credential
-            // by combining the code with a verification ID.
             Log.d(tag, "onCodeSent:$verificationId")
 
-            // Save verification ID and resending token so we can use them later
             storedVerificationId = verificationId
             resendToken = token
         }
@@ -70,9 +68,13 @@ class AuthViewModel: ViewModel() {
     fun verifyCode(code: String) {
         val verificationId = storedVerificationId
         if (verificationId != null) {
+            _authState.update {
+                AuthState.Loading
+            }
             val credential = PhoneAuthProvider.getCredential(verificationId, code)
             signInWithPhoneAuthCredential(credential)
         } else {
+            AuthState.Error("Verification ID is null")
             Log.w(tag, "Verification ID is null")
         }
     }
@@ -88,6 +90,10 @@ class AuthViewModel: ViewModel() {
     }
 
     private fun signInWithPhoneAuthCredential(credential: PhoneAuthCredential) {
+        _authState.update {
+            AuthState.Loading
+        }
+
         auth.signInWithCredential(credential)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -106,7 +112,7 @@ class AuthViewModel: ViewModel() {
             }
     }
 
-    fun checkAuthStatus() {
+    private fun checkAuthStatus() {
         if (auth.currentUser == null) {
             _authState.update {
                 AuthState.Unauthenticated
