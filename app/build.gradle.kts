@@ -75,4 +75,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$navVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
+//    location
+    implementation (libs.play.services.location)
 }

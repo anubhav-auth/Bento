@@ -27,6 +27,8 @@ import com.anubhav_auth.bento.authentication.OTPVerificationPage
 import com.anubhav_auth.bento.authentication.PhoneNumberEntryPage
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
 import com.anubhav_auth.bento.userInterface.testPage
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
@@ -35,8 +37,13 @@ class MainActivity : ComponentActivity() {
         ViewModelProvider(this)[AuthViewModel::class.java]
     }
 
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
         enableEdgeToEdge()
         setContent {
 
