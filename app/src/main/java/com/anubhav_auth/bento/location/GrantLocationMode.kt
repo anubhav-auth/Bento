@@ -1,7 +1,7 @@
 package com.anubhav_auth.bento.location
 
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,10 +27,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anubhav_auth.bento.R
+import com.anubhav_auth.bento.SharedStateViewModel
+import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.ui.theme.MyFonts
+import java.util.Optional
 
 @Composable
-fun GrantLocationMode() {
+fun GrantLocationMode(
+    sharedStateViewModel: SharedStateViewModel,
+    requestPermissionLauncher: ActivityResultLauncher<Array<String>>
+) {
+
+    val permissionArray = arrayOf(
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    )
+
+
     Column(
         modifier = Modifier
             .padding(12.dp)
@@ -50,18 +63,35 @@ fun GrantLocationMode() {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Grant Current Location", modifier = Modifier.width(240.dp), fontFamily = MyFonts.montserrat_semi_bold, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
+            Text(
+                text = "Grant Current Location",
+                modifier = Modifier.width(240.dp),
+                fontFamily = MyFonts.montserrat_semi_bold,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.ExtraBold
+            )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Text(text = "This lets us show nearby restaurants you can order from", modifier = Modifier.width(240.dp), fontFamily = MyFonts.lato_regular, textAlign = TextAlign.Center)
+
+
+            Text(
+                text = "This lets us show nearby restaurants you can order from",
+                modifier = Modifier.width(240.dp),
+                fontFamily = MyFonts.lato_regular,
+                textAlign = TextAlign.Center
+            )
 
             Spacer(modifier = Modifier.height(60.dp))
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
-                onClick = {},
+                onClick = {
+                    requestPermissionLauncher.launch(
+                        permissionArray
+                    )
+                },
                 shape = RoundedCornerShape(9.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black, contentColor = Color.White
@@ -86,10 +116,4 @@ fun GrantLocationMode() {
         }
 
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun grantloc() {
-    GrantLocationMode()
 }

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -70,11 +71,21 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     val navVersion = "2.7.7"
+    val room_version = "2.6.1"
 
-    // Jetpack Compose integration
+//    Jetpack Compose integration
     implementation("androidx.navigation:navigation-compose:$navVersion")
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
 //    location
     implementation (libs.play.services.location)
+
+//    room
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
+
+//    maps
+    implementation("com.google.maps.android:maps-compose:6.1.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 }
