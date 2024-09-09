@@ -8,16 +8,16 @@ import com.google.android.gms.maps.model.LatLng
 @Entity
 data class SavedAddress(
     @PrimaryKey(autoGenerate = true)
-    private val id: Long = 0,
-    private val houseFlatNo: String,
-    private val floorNo: String,
-    private val apartmentBuildingName: String,
-    private val howToReach: String,
-    private val landmark: String,
-    private val contactNumber: Long,
-    private val latLang: LatLng,
-    private val mapAddress: String,
-    private val addressType: AddressType
+    val id: Long = 0,
+    val houseFlatNo: String,
+    val floorNo: String,
+    val apartmentBuildingName: String,
+    val howToReach: String,
+    val landmark: String,
+    val contactNumber: Long,
+    val latLang: LatLng,
+    val mapAddress: String,
+    val addressType: AddressType
 )
 
 enum class AddressType{

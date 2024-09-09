@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.channels.Channel
@@ -18,7 +19,7 @@ import kotlinx.coroutines.launch
 class LocationViewmodel : ViewModel() {
     private val tag = "mytag"
 
-    private val _latLang = MutableStateFlow<String>("london")
+    private val _latLang = MutableStateFlow<LatLng>(LatLng(0.0,0.0))
     val latLang = _latLang.asStateFlow()
 
     private val _showErrorChannel = Channel<Boolean>()
@@ -35,7 +36,7 @@ class LocationViewmodel : ViewModel() {
         fusedLocationProviderClient.getCurrentLocation(accuracy, CancellationTokenSource().token)
             .addOnSuccessListener { location->
                 _latLang.update {
-                    "${location.latitude},${location.longitude}"
+                    LatLng(location.latitude, location.longitude)
                 }
             }
             .addOnFailureListener{ e->
@@ -57,7 +58,7 @@ class LocationViewmodel : ViewModel() {
         fusedLocationProviderClient.lastLocation
             .addOnSuccessListener { location->
                 _latLang.update {
-                    "${location.latitude},${location.longitude}"
+                    LatLng(location.latitude, location.longitude)
                 }
             }
             .addOnFailureListener{ e->

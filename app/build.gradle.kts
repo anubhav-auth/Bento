@@ -1,3 +1,12 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+val properties = Properties()
+val propertiesFile = rootProject.file("secrets.properties")
+if (propertiesFile.exists()){
+    properties.load(FileInputStream(propertiesFile))
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -20,6 +29,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String", "maps_api", properties["MAPS_API"] as String)
+        resValue("string", "maps_api", properties["MAPS_API"] as String)
     }
 
     buildTypes {
@@ -40,6 +52,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -73,8 +86,7 @@ dependencies {
     val navVersion = "2.7.7"
     val room_version = "2.6.1"
 
-//    Jetpack Compose integration
-    implementation("androidx.navigation:navigation-compose:$navVersion")
+//    navigation Jetpack Compose integration
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
 //    location
@@ -82,10 +94,19 @@ dependencies {
 
 //    room
     implementation("androidx.room:room-runtime:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+
 
 //    maps
     implementation("com.google.maps.android:maps-compose:6.1.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+
+//    retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.moshi:moshi:1.15.1")
+
 }
