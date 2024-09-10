@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento
+package com.anubhav_auth.bento.location
 
 import android.util.Log
 import android.widget.Toast
@@ -15,19 +15,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.anubhav_auth.bento.location.LocationViewmodel
+import com.anubhav_auth.bento.R
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable

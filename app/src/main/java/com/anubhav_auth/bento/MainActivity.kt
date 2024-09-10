@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -22,10 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
+import com.anubhav_auth.bento.api.BentoApiRepoImpl
+import com.anubhav_auth.bento.api.RetroFitInstance
 import com.anubhav_auth.bento.authentication.AuthState
 import com.anubhav_auth.bento.authentication.AuthViewModel
 import com.anubhav_auth.bento.authentication.OTPVerificationPage
@@ -34,6 +38,7 @@ import com.anubhav_auth.bento.database.BentoDatabase
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.location.GrantLocationMode
 import com.anubhav_auth.bento.location.LocationViewmodel
+import com.anubhav_auth.bento.location.MarkerLocation
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
 import com.anubhav_auth.bento.userInterface.testPage
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -67,6 +72,16 @@ class MainActivity : ComponentActivity() {
     private val locationViewmodel: LocationViewmodel by lazy {
         ViewModelProvider(this)[LocationViewmodel::class.java]
     }
+    private val bentoViewModel by viewModels<BentoViewModel>(factoryProducer = {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return BentoViewModel(
+                    BentoApiRepoImpl(RetroFitInstance.api)
+                ) as T
+            }
+        }
+    })
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
@@ -90,6 +105,20 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val authState by authViewModel.authState.collectAsState()
 
+//            val placesData by bentoViewModel.placesData.collectAsState()
+//
+//            var text by remember {
+//                mutableStateOf("")
+//            }
+//
+//            TextField(value = text, onValueChange = {
+//                text = it
+//                bentoViewModel.loadPlacesData(text)
+//            })
+//
+//
+//            Log.d("mytag", placesData.toString())
+
 
 
             Scaffold { paddingVal ->
@@ -109,7 +138,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(navController = navController, startDestination = startDestination) {
                         composable("error") {
-                            ErrorScreen()
+                            ErrorScreen(navController)
                         }
                         composable("onboarding") {
                             OnboardingScreen(scope) {
@@ -161,7 +190,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ErrorScreen() {
+fun ErrorScreen(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()

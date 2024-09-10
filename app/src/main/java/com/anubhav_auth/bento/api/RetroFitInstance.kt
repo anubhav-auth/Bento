@@ -1,5 +1,6 @@
 package com.anubhav_auth.bento.api
 
+import com.anubhav_auth.bento.api.Api.Companion.BASE_URL_PLACES
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -19,7 +20,7 @@ object RetroFitInstance {
     val api: Api = Retrofit
         .Builder()
         .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl("")
+        .baseUrl(BASE_URL_PLACES)
         .client(client)
         .build()
         .create(Api::class.java)
