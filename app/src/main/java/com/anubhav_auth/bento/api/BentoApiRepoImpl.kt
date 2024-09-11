@@ -6,14 +6,12 @@ import kotlinx.coroutines.flow.flow
 
 class BentoApiRepoImpl(private val api: Api):BentoApiRepository {
     override suspend fun getPlacesFromText(
-        fields: String,
-        input: String,
-        inputType: String,
+        query: String,
         apiKey: String
     ): Flow<Response<PlacesData>> {
         return flow {
             val placesFromApi = try {
-                api.findPlace(fields, input, inputType, apiKey)
+                api.findPlace(query, apiKey)
             }catch (e:Exception){
                 e.printStackTrace()
                 emit(Response.Error(message = "Problem loading places data"))

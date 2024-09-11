@@ -7,11 +7,9 @@ import retrofit2.http.Query
 
 interface Api {
 
-    @GET("place/findplacefromtext/json")
+    @GET("place/textsearch/json")
     suspend fun findPlace(
-        @Query("fields") fields: String = "formatted_address,name,geometry",
-        @Query("input") input: String,
-        @Query("inputtype") inputType: String = "textquery",
+        @Query("query") input: String,
         @Query("key") apiKey: String = BuildConfig.maps_api
     ): PlacesData
 

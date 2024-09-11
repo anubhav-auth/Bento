@@ -19,11 +19,9 @@ import java.util.concurrent.TimeUnit
 
 class AuthViewModel: ViewModel() {
     private val auth = FirebaseAuth.getInstance()
-
+    private val tag = "AUTH"
     private var storedVerificationId: String? = null
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
-
-    val tag = "mytag"
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
     val authState = _authState.asStateFlow()

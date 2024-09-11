@@ -33,7 +33,7 @@ class BentoViewModel(
         if (!isLoading) {
             isLoading = true
             viewModelScope.launch {
-               bentoApiRepository.getPlacesFromText(input = searchString).collectLatest { result->
+               bentoApiRepository.getPlacesFromText(query = searchString).collectLatest { result->
                    when(result){
                        is Response.Error -> {
                            _showErrorChannel.send(true)
@@ -44,7 +44,6 @@ class BentoViewModel(
                                _placesData.update {
                                    data
                                }
-                               Log.d("mytag1", data.toString())
                            }
                            isLoading = false
                        }

@@ -8,9 +8,7 @@ import retrofit2.http.Query
 interface BentoApiRepository {
 
     suspend fun getPlacesFromText(
-        fields: String = "formatted_address,name,geometry",
-        input: String,
-        inputType: String = "textquery",
+        query: String,
         apiKey: String = BuildConfig.maps_api
     ):Flow<Response<PlacesData>>
 

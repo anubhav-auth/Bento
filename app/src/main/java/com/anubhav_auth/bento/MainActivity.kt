@@ -105,20 +105,6 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val authState by authViewModel.authState.collectAsState()
 
-//            val placesData by bentoViewModel.placesData.collectAsState()
-//
-//            var text by remember {
-//                mutableStateOf("")
-//            }
-//
-//            TextField(value = text, onValueChange = {
-//                text = it
-//                bentoViewModel.loadPlacesData(text)
-//            })
-//
-//
-//            Log.d("mytag", placesData.toString())
-
 
 
             Scaffold { paddingVal ->
@@ -136,7 +122,7 @@ class MainActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = startDestination) {
+                    NavHost(navController = navController, startDestination = "locationAccessPage") {
                         composable("error") {
                             ErrorScreen(navController)
                         }
@@ -175,7 +161,9 @@ class MainActivity : ComponentActivity() {
                         composable("locationAccessPage") {
                             GrantLocationMode(
                                 sharedStateViewModel = sharedStateViewModel,
-                                requestPermissionLauncher = requestPermissionLauncher
+                                bentoViewModel = bentoViewModel,
+                                requestPermissionLauncher = requestPermissionLauncher,
+                                scope = scope
                             )
                         }
                         composable("markerPage"){
