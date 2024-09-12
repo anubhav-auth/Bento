@@ -253,5 +253,6 @@ fun SearchResultItem(result: Result?) {
 @Preview
 @Composable
 private fun pre() {
+    SearchResultItem(result = )
 }
 
