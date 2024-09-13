@@ -1,5 +1,6 @@
 package com.anubhav_auth.bento.location
 
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,15 +20,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -43,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anubhav_auth.bento.BentoViewModel
@@ -202,34 +205,71 @@ fun SheetSearch(
 
     val placesData by bentoViewModel.placesData.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(18.dp), horizontalAlignment = Alignment.Start
+    ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "",
             modifier = Modifier
-                .align(Alignment.Start)
                 .clickable {
                     scope.launch {
                         scaffoldState.bottomSheetState.hide()
                     }
                 }
         )
-        Text(text = "Search Location")
-        TextField(value = searchText, onValueChange = { searchParam ->
-            searchText = searchParam
-            bentoViewModel.loadPlacesData(searchText)
-        })
-        SearchResultMenu(placesData = placesData)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "Search Location",
+            fontSize = 24.sp,
+            fontFamily = MyFonts.openSansBold,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        TextField(
+            value = searchText,
+            onValueChange = { searchParam ->
+                searchText = searchParam
+                if (searchParam.isEmpty()) {
+                    bentoViewModel.clearLoadedPlacesDate()
+                } else {
+                    bentoViewModel.loadPlacesData(searchText)
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            placeholder = { Text(text = "eg. BTM Layout") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = "search icon"
+                )
+            },
+            singleLine = true,
+            maxLines = 1,
+            shape = RoundedCornerShape(21.dp),
+            colors = TextFieldDefaults.colors().copy(
+                focusedContainerColor = Color.LightGray.copy(alpha = 0.55f),
+                unfocusedContainerColor = Color.LightGray.copy(alpha = 0.55f),
+                unfocusedIndicatorColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent
+            )
+
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        HistoryMenu()
+//        SearchResultMenu(placesData = placesData, modifier = Modifier.align(Alignment.Start))
     }
 }
 
 @Composable
-fun SearchResultMenu(placesData: PlacesData?) {
+fun SearchResultMenu(placesData: PlacesData?, modifier: Modifier = Modifier) {
     placesData?.results?.let { placesResults ->
 
         LazyColumn {
             items(placesResults) { place ->
-                SearchResultItem(result = place)
+                SearchResultItem(result = place, modifier = modifier)
                 Spacer(modifier = Modifier.height(3.dp))
             }
         }
@@ -237,22 +277,66 @@ fun SearchResultMenu(placesData: PlacesData?) {
 }
 
 @Composable
-fun SearchResultItem(result: Result?) {
+fun SearchResultItem(result: Result?, modifier: Modifier = Modifier) {
     result?.let {
-        Row {
-            Icon(imageVector = Icons.Outlined.LocationOn, contentDescription = "location")
+        Row(modifier = modifier.padding(bottom = 24.dp)) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = "location",
+                modifier = Modifier.size(30.dp)
+            )
             Column {
-                Text(text = it.name)
-                Text(text = result.formatted_address)
-
+                Text(text = it.name, fontSize = 18.sp, fontFamily = MyFonts.montserrat_semi_bold)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = result.formatted_address,
+                    fontFamily = MyFonts.roboto_regular,
+                    fontWeight = FontWeight.W500
+                )
             }
         }
     }
 }
 
-@Preview
 @Composable
-private fun pre() {
-    SearchResultItem(result = )
+fun HistoryMenu() {
+    // TODO: click to use current location 
+    Column {
+        HistoryMenuItem(
+            historyItemContent = HistoryItemContent(
+                icon = R.drawable.target,
+                title = "Use Current Location"
+            ),
+            modifier = Modifier.clickable {
+                
+            }
+        )
+        HorizontalDivider()
+        Text(text = "Recent Searches")
+        HorizontalDivider()
+        Text(text = "Saved Addresses")
+    }
 }
+
+
+@Composable
+fun HistoryMenuItem(historyItemContent: HistoryItemContent, modifier: Modifier = Modifier) {
+    Row(modifier = modifier.padding(bottom = 24.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(painter = painterResource(id = historyItemContent.icon), contentDescription = "", modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(text = historyItemContent.title, fontSize = 15.sp, fontWeight = FontWeight.W500)
+            if (historyItemContent.description != null) {
+                Text(text = historyItemContent.description)
+            } 
+        }
+    }
+}
+
+data class HistoryItemContent(
+    val icon: Int,
+    val title: String,
+    val description: String? = null,
+)
+
 

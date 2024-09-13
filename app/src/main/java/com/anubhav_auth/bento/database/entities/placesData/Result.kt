@@ -1,7 +1,11 @@
 package com.anubhav_auth.bento.database.entities.placesData
 
+import com.squareup.moshi.Json
+
 data class Result(
-    val business_status: String,
+    @Json(name = "business_status")
+    val businessStatus: String,
+    @Json(name = "formatted_address")
     val formatted_address: String,
     val geometry: Geometry,
     val icon: String,

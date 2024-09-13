@@ -52,4 +52,10 @@ class BentoViewModel(
             }
         }
     }
+
+    fun clearLoadedPlacesDate(){
+        _placesData.update {
+            null
+        }
+    }
 }
