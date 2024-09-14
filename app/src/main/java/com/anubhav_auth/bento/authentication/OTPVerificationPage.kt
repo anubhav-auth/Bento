@@ -66,7 +66,7 @@ fun OTPVerificationPage(
 
     LaunchedEffect(authState) {
         when (authState) {
-            is AuthState.Authenticated -> navController.navigate("homePage")
+            is AuthState.Authenticated -> navController.navigate("locationAccessPage")
             is AuthState.Error -> Toast.makeText(
                 context,
                 (authState as AuthState.Error).message, Toast.LENGTH_SHORT

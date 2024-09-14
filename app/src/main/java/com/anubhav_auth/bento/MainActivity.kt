@@ -122,13 +122,13 @@ class MainActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "locationAccessPage") {
+                    NavHost(navController = navController, startDestination = "markerPage") {
                         composable("error") {
                             ErrorScreen(navController)
                         }
                         composable("onboarding") {
                             OnboardingScreen(scope) {
-                                navController.navigate("loginPage")
+                                navController.navigate("locationAccessPage")
                             }
                         }
                         composable("loginPage") {
@@ -155,9 +155,6 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                         }
-                        composable("homePage") {
-                            testPage()
-                        }
                         composable("locationAccessPage") {
                             GrantLocationMode(
                                 sharedStateViewModel = sharedStateViewModel,
@@ -167,7 +164,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("markerPage"){
-                            MarkerLocation(locationViewmodel, fusedLocationProviderClient)
+                            MarkerLocation(locationViewmodel,bentoViewModel, fusedLocationProviderClient)
+                        }
+                        composable("homePage") {
+                            testPage()
                         }
                     }
                 }

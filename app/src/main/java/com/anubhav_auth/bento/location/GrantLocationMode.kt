@@ -1,6 +1,5 @@
 package com.anubhav_auth.bento.location
 
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,7 +25,6 @@ import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -258,8 +256,8 @@ fun SheetSearch(
 
         )
         Spacer(modifier = Modifier.height(24.dp))
-        HistoryMenu()
-//        SearchResultMenu(placesData = placesData, modifier = Modifier.align(Alignment.Start))
+//        HistoryMenu()
+        SearchResultMenu(placesData = placesData, modifier = Modifier.align(Alignment.Start))
     }
 }
 
@@ -298,37 +296,44 @@ fun SearchResultItem(result: Result?, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun HistoryMenu() {
-    // TODO: click to use current location 
-    Column {
-        HistoryMenuItem(
-            historyItemContent = HistoryItemContent(
-                icon = R.drawable.target,
-                title = "Use Current Location"
-            ),
-            modifier = Modifier.clickable {
-                
-            }
-        )
-        HorizontalDivider()
-        Text(text = "Recent Searches")
-        HorizontalDivider()
-        Text(text = "Saved Addresses")
-    }
-}
+//@Composable
+//fun HistoryMenu() {
+//    // TODO: click to use current location
+//    Column {
+//        HistoryMenuItem(
+//            historyItemContent = HistoryItemContent(
+//                icon = R.drawable.target,
+//                title = "Use Current Location"
+//            ),
+//            modifier = Modifier.clickable {
+//
+//            }
+//        )
+//        HorizontalDivider()
+//        Text(text = "Recent Searches")
+//        HorizontalDivider()
+//        Text(text = "Saved Addresses")
+//    }
+//}
 
 
 @Composable
 fun HistoryMenuItem(historyItemContent: HistoryItemContent, modifier: Modifier = Modifier) {
-    Row(modifier = modifier.padding(bottom = 24.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(painter = painterResource(id = historyItemContent.icon), contentDescription = "", modifier = Modifier.size(24.dp))
+    Row(
+        modifier = modifier.padding(bottom = 24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = historyItemContent.icon),
+            contentDescription = "",
+            modifier = Modifier.size(24.dp)
+        )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
             Text(text = historyItemContent.title, fontSize = 15.sp, fontWeight = FontWeight.W500)
             if (historyItemContent.description != null) {
                 Text(text = historyItemContent.description)
-            } 
+            }
         }
     }
 }

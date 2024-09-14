@@ -4,9 +4,9 @@ import com.squareup.moshi.Json
 
 data class Result(
     @Json(name = "address_components")
-    val addressComponents: List<AddressComponent>,
+    val address_components: List<AddressComponent>,
     @Json(name = "formatted_address")
-    val formattedAddress: String,
+    val formatted_address: String,
     val geometry: Geometry,
     @Json(name = "place_id")
     val placeId: String,
