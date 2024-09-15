@@ -15,17 +15,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetValue
@@ -44,21 +48,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.SharedStateViewModel
+import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.database.entities.AddressTypes
+import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -76,6 +87,7 @@ fun MarkerLocation(
     scope: CoroutineScope,
     locationViewmodel: LocationViewmodel,
     sharedStateViewModel: SharedStateViewModel,
+    localDatabaseViewModel: LocalDatabaseViewModel,
     bentoViewModel: BentoViewModel,
     fusedLocationProviderClient: FusedLocationProviderClient
 ) {
@@ -113,50 +125,157 @@ fun MarkerLocation(
     }
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Expanded,
-            skipHiddenState = true
+            initialValue = SheetValue.Hidden,
+            skipHiddenState = false
         )
     )
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
+            val focusRequester = List(6){FocusRequester()}
+
+            var houseNumber by remember { mutableStateOf("") }
+            var floorNumber by remember { mutableStateOf("") }
+            var buildingName by remember { mutableStateOf("") }
+            var howToReach by remember { mutableStateOf("") }
+            var contactNumber by remember { mutableStateOf("") }
+            var name by remember { mutableStateOf("") }
+
             val sheetCameraPosition = rememberCameraPositionState {
                 position = CameraPosition.fromLatLngZoom(centerLocation, 19.5f)
             }
             geoCodeData?.results?.get(1)?.let { geo ->
-                Column(horizontalAlignment = Alignment.Start, modifier = Modifier.padding(12.dp)) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "")
-                    Text(text = "Add Address Details")
-                    GoogleMap(
-                        cameraPositionState = sheetCameraPosition,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
-                        uiSettings = MapUiSettings(
-                            compassEnabled = false,
-                            zoomControlsEnabled = false,
-                            rotationGesturesEnabled = false,
-                            scrollGesturesEnabled = false,
-                            tiltGesturesEnabled = false,
-                            zoomGesturesEnabled = false
+                LazyColumn(
+                    horizontalAlignment = Alignment.Start, modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .padding(top = 13.dp)
+                ) {
+                    item {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "",
+                            modifier = Modifier.size(27.dp).clickable {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.hide()
+                                }
+                            }
                         )
-                    ) {
-                        Marker(
-                            state = rememberMarkerState(position = centerLocation)
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Add Address Details",
+                            fontSize = 21.sp,
+                            fontFamily = MyFonts.montserrat_semi_bold
                         )
-                    }
-                    Text(text = geo.address_components[0].long_name)
-                    Text(text = geo.formatted_address)
-                    AddressComponentItem(heading = "House / Flat Number")
-                    AddressComponentItem(heading = "Floor number")
-                    AddressComponentItem(heading = "Apartment/ Building name")
-                    AddressComponentItem(heading = "How to reach")
-                    AddressComponentItem(heading = "Contact number")
-                    AddressComponentItem(heading = "Name")
-                    AddressDynamicChipMenu(chipText = AddressTypes.AsStringList(), sharedStateViewModel = sharedStateViewModel)
-                    Button(onClick = { /*TODO*/ }) {
-                        Text(text = "Save Address")
+                        Spacer(modifier = Modifier.height(9.dp))
+                        GoogleMap(
+                            cameraPositionState = sheetCameraPosition,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            uiSettings = MapUiSettings(
+                                compassEnabled = false,
+                                zoomControlsEnabled = false,
+                                rotationGesturesEnabled = false,
+                                scrollGesturesEnabled = false,
+                                tiltGesturesEnabled = false,
+                                zoomGesturesEnabled = false
+                            )
+                        ) {
+                            Marker(
+                                state = rememberMarkerState(position = centerLocation)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = geo.address_components[0].long_name,
+                            fontSize = 21.sp,
+                            fontFamily = MyFonts.openSansBold
+                        )
+                        Spacer(modifier = Modifier.height(9.dp))
+                        Text(
+                            text = geo.formatted_address,
+                            fontSize = 15.sp,
+                            fontFamily = MyFonts.lato_regular
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        AddressComponentItem(
+                            heading = "House / Flat Number",
+                            text = houseNumber,
+                            valChange = { houseNumber = it },
+                            index = 0,
+                            focusRequesters = focusRequester,
+                        )
+                        AddressComponentItem(
+                            heading = "Floor number",
+                            text = floorNumber,
+                            valChange = { floorNumber = it },
+                            index = 1,
+                            focusRequesters = focusRequester
+                        )
+                        AddressComponentItem(
+                            heading = "Apartment/ Building name",
+                            text = buildingName,
+                            valChange = { buildingName = it },
+                            index = 2,
+                            focusRequesters = focusRequester
+                        )
+                        AddressComponentItem(
+                            heading = "How to reach",
+                            text = howToReach,
+                            valChange = { howToReach = it },
+                            maxLines = 5,
+                            singleLine = false,
+                            index = 3,
+                            focusRequesters = focusRequester
+                        )
+                        AddressComponentItem(
+                            heading = "Contact number",
+                            text = contactNumber,
+                            valChange = { contactNumber = it },
+                            isContact = true,
+                            index = 4,
+                            focusRequesters = focusRequester
+                        )
+                        AddressComponentItem(
+                            heading = "Name",
+                            text = name,
+                            valChange = { name = it },
+                            index = 5,
+                            focusRequesters = focusRequester,
+                            isLast = true
+                        )
+                        AddressDynamicChipMenu(
+                            chipText = AddressTypes.AsStringList(),
+                            sharedStateViewModel = sharedStateViewModel
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Button(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(45.dp),
+                            onClick = {
+                                localDatabaseViewModel.saveAddress(
+                                    SavedAddress(
+                                        houseFlatNo = houseNumber,
+                                        floorNo = floorNumber,
+                                        apartmentBuildingName = buildingName,
+                                        howToReach = howToReach,
+                                        contactNumber = contactNumber,
+                                        latLng = centerLocation,
+                                        mapAddress = geo.formatted_address,
+                                        addressType = AddressTypes.entries[sharedStateViewModel.selectedAddressIndex.value]
+                                    )
+                                )
+                            },
+                            shape = RoundedCornerShape(9.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black
+                            )
+                        ) {
+                            Text(text = "Save Address")
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
@@ -171,19 +290,21 @@ fun MarkerLocation(
                 uiSettings = MapUiSettings(
                     zoomControlsEnabled = false,
                     tiltGesturesEnabled = false,
-                    scrollGesturesEnabledDuringRotateOrZoom = false
+                    scrollGesturesEnabledDuringRotateOrZoom = false,
+
                 ),
                 properties = MapProperties(
                     isBuildingEnabled = true,
                     isIndoorEnabled = true,
                     mapType = MapType.NORMAL
+
                 ),
                 onMapLoaded = {
                     currentLocation.let {
                         cameraPositionState.position =
                             CameraPosition.fromLatLngZoom(it, 19.5f)
                     }
-                }
+                },
             )
             Image(
                 painter = painterResource(id = R.drawable.marker_image),
@@ -195,6 +316,8 @@ fun MarkerLocation(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(width = 2.dp, Color.LightGray, shape = RoundedCornerShape(12.dp))
                     .background(Color.White)
                     .fillMaxWidth()
                     .fillMaxHeight(0.18f)
@@ -218,18 +341,31 @@ fun MarkerLocation(
                             Text(
                                 text = it.formatted_address,
                                 fontSize = 15.sp,
-                                fontFamily = MyFonts.lato_regular
+                                fontFamily = MyFonts.lato_regular,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
 
                 Button(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(15.dp)
+                        .fillMaxWidth()
+                        .height(45.dp),
+                    enabled = geoCodeData?.results?.get(1) != null,
                     onClick = {
                         scope.launch {
                             scaffoldState.bottomSheetState.expand()
                         }
-                    }
+                    },
+                    shape = RoundedCornerShape(9.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black
+                    )
+
                 ) {
                     Text(text = "Confirm Location")
                 }
@@ -242,17 +378,18 @@ fun MarkerLocation(
 @Composable
 fun AddressComponentItem(
     modifier: Modifier = Modifier,
+    text: String,
+    valChange: (String) -> Unit,
     heading: String,
     isContact: Boolean = false,
     singleLine: Boolean = true,
-    maxLines: Int = 1
+    maxLines: Int = 1,
+    index: Int,
+    focusRequesters: List<FocusRequester>,
+    isLast: Boolean = false
 ) {
-
-
-    var text by remember {
-        mutableStateOf("")
-    }
-
+    var text2 = text
+    val phoneNumberRegex = Regex("[^0-9]")
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(9.dp))
         Text(text = heading, fontWeight = FontWeight.SemiBold, fontFamily = MyFonts.lato_regular)
@@ -260,11 +397,17 @@ fun AddressComponentItem(
         TextField(
             value = text,
             onValueChange = {
-                text = it
+                if (isContact) {
+                    val stripped = phoneNumberRegex.replace(it, "")
+                    valChange(if (stripped.length >= 10) stripped.substring(0..9) else stripped)
+                } else {
+                    valChange(it)
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .border(width = 2.dp, color = Color.LightGray, shape = RoundedCornerShape(12.dp)),
+                .border(width = 2.dp, color = Color.LightGray, shape = RoundedCornerShape(12.dp))
+                .focusRequester(focusRequesters[index]),
             shape = RoundedCornerShape(12.dp),
             colors = TextFieldDefaults.colors().copy(
                 focusedContainerColor = Color.Transparent,
@@ -275,8 +418,15 @@ fun AddressComponentItem(
             singleLine = singleLine,
             maxLines = maxLines,
             keyboardOptions = KeyboardOptions(
-                keyboardType = if (isContact) KeyboardType.Number else KeyboardType.Text
-            )
+                keyboardType = if (isContact) KeyboardType.Number else KeyboardType.Text,
+                imeAction = if (!isLast) ImeAction.Next else ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    focusRequesters[index+1].requestFocus()
+                }
+            ),
+            prefix = { if (isContact) Text(text = "+91") }
         )
     }
 }
@@ -299,7 +449,7 @@ fun AddressDynamicChipMenu(chipText: List<String>, sharedStateViewModel: SharedS
 fun AddressChipItem(text: String, index: Int, sharedStateViewModel: SharedStateViewModel) {
     Box(
         modifier = Modifier
-            .padding(start = 6.dp, top = 9.dp)
+            .padding(start = 9.dp, top = 12.dp)
             .clip(RoundedCornerShape(18.dp))
             .clickable {
                 sharedStateViewModel.selectedAddressIndex.value = index
@@ -314,7 +464,7 @@ fun AddressChipItem(text: String, index: Int, sharedStateViewModel: SharedStateV
         Text(
             text = text,
             color = Color.Black,
-            fontSize = 9.sp,
+            fontSize = 12.sp,
             fontFamily = MyFonts.openSansBold,
             fontWeight = FontWeight.Bold
         )

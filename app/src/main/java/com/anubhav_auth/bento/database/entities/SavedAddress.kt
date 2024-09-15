@@ -2,6 +2,7 @@ package com.anubhav_auth.bento.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.anubhav_auth.bento.database.entities.placesData.Geometry
 import com.google.android.gms.maps.model.LatLng
 
 
@@ -13,9 +14,8 @@ data class SavedAddress(
     val floorNo: String,
     val apartmentBuildingName: String,
     val howToReach: String,
-    val landmark: String,
-    val contactNumber: Long,
-    val latLang: LatLng,
+    val contactNumber: String,
+    val latLng: LatLng,
     val mapAddress: String,
     val addressType: AddressTypes
 )

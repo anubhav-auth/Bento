@@ -176,8 +176,7 @@ fun PhoneNumberEntryPage(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(45.dp)
-                    ,
+                    .height(45.dp),
                 onClick = {
                     onContinue()
                 },
