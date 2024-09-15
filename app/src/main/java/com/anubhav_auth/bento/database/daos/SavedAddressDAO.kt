@@ -16,5 +16,5 @@ interface SavedAddressDAO {
     suspend fun deleteAddress(savedAddress: SavedAddress)
 
     @Query("SELECT * FROM SAVEDADDRESS")
-    fun getAllAddresses():Flow<List<SavedAddress>>
+    fun getAllAddresses(): Flow<List<SavedAddress>>
 }

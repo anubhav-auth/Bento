@@ -1,5 +1,7 @@
 package com.anubhav_auth.bento.location
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -25,6 +28,7 @@ import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
@@ -42,14 +46,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.SharedStateViewModel
+import com.anubhav_auth.bento.database.IconUtl
+import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.database.entities.placesData.PlacesData
 import com.anubhav_auth.bento.database.entities.placesData.Result
 import com.anubhav_auth.bento.ui.theme.MyFonts
@@ -61,9 +69,29 @@ import kotlinx.coroutines.launch
 fun GrantLocationMode(
     sharedStateViewModel: SharedStateViewModel,
     bentoViewModel: BentoViewModel,
+    localDatabaseViewModel: LocalDatabaseViewModel,
     requestPermissionLauncher: ActivityResultLauncher<Array<String>>,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    navController: NavController
 ) {
+    localDatabaseViewModel.getSavedAddresses()
+    val savedAddress by localDatabaseViewModel.savedAddress.collectAsState()
+
+    Log.d("mytag", savedAddress.toString())
+
+//    if (savedAddress.isNotEmpty()){
+//        navController.navigate("homePage")
+//    }
+//
+//    LaunchedEffect(Unit) {
+//        if (savedAddress.isNotEmpty()){
+//            navController.navigate("homePage")
+//        }
+//    }
+
+
+    val context = LocalContext.current
+
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Hidden,
@@ -71,13 +99,22 @@ fun GrantLocationMode(
         )
     )
 
+    BackHandler {
+        scope.launch {
+            scaffoldState.bottomSheetState.hide()
+        }
+    }
+
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
             SheetSearch(
                 scope = scope,
                 scaffoldState = scaffoldState,
-                bentoViewModel = bentoViewModel
+                sharedStateViewModel,
+                bentoViewModel,
+                localDatabaseViewModel,
+                navController
             )
         },
         sheetPeekHeight = 0.dp,
@@ -87,11 +124,13 @@ fun GrantLocationMode(
             sharedStateViewModel = sharedStateViewModel,
             requestPermissionLauncher = requestPermissionLauncher,
             scaffoldState = scaffoldState,
-            scope = scope
+            scope = scope,
+            navController = navController
         )
     }
 
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,15 +138,21 @@ fun LocationChoice(
     sharedStateViewModel: SharedStateViewModel,
     requestPermissionLauncher: ActivityResultLauncher<Array<String>>,
     scaffoldState: BottomSheetScaffoldState,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    navController: NavController
 ) {
     val permissionArray = arrayOf(
         android.Manifest.permission.ACCESS_FINE_LOCATION,
         android.Manifest.permission.ACCESS_COARSE_LOCATION,
     )
-
     val permissionGranted by sharedStateViewModel.allPermissionGranted
 
+
+    if (!permissionGranted) {
+        requestPermissionLauncher.launch(
+            permissionArray
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -152,12 +197,9 @@ fun LocationChoice(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp),
+                enabled = permissionGranted,
                 onClick = {
-                    if (!permissionGranted) {
-                        requestPermissionLauncher.launch(
-                            permissionArray
-                        )
-                    }
+                    navController.navigate("markerPage")
                 },
                 shape = RoundedCornerShape(9.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -194,7 +236,10 @@ fun LocationChoice(
 fun SheetSearch(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    bentoViewModel: BentoViewModel
+    sharedStateViewModel: SharedStateViewModel,
+    bentoViewModel: BentoViewModel,
+    localDatabaseViewModel: LocalDatabaseViewModel,
+    navController: NavController
 ) {
 
     var searchText by remember {
@@ -256,18 +301,43 @@ fun SheetSearch(
 
         )
         Spacer(modifier = Modifier.height(24.dp))
-//        HistoryMenu()
-        SearchResultMenu(placesData = placesData, modifier = Modifier.align(Alignment.Start))
+        if (placesData == null) {
+            HistoryMenu(
+                localDatabaseViewModel = localDatabaseViewModel,
+                sharedStateViewModel,
+                navController
+            )
+        } else {
+            SearchResultMenu(
+                placesData = placesData,
+                modifier = Modifier.align(Alignment.Start),
+                sharedStateViewModel,
+                bentoViewModel,
+                navController
+            )
+        }
     }
 }
 
 @Composable
-fun SearchResultMenu(placesData: PlacesData?, modifier: Modifier = Modifier) {
+fun SearchResultMenu(
+    placesData: PlacesData?,
+    modifier: Modifier = Modifier,
+    sharedStateViewModel: SharedStateViewModel,
+    bentoViewModel: BentoViewModel,
+    navController: NavController
+) {
     placesData?.results?.let { placesResults ->
 
         LazyColumn {
             items(placesResults) { place ->
-                SearchResultItem(result = place, modifier = modifier)
+                SearchResultItem(
+                    result = place,
+                    modifier = modifier,
+                    sharedStateViewModel = sharedStateViewModel,
+                    bentoViewModel,
+                    navController = navController
+                )
                 Spacer(modifier = Modifier.height(3.dp))
             }
         }
@@ -275,9 +345,23 @@ fun SearchResultMenu(placesData: PlacesData?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SearchResultItem(result: Result?, modifier: Modifier = Modifier) {
+fun SearchResultItem(
+    result: Result?,
+    modifier: Modifier = Modifier,
+    sharedStateViewModel: SharedStateViewModel,
+    bentoViewModel: BentoViewModel,
+    navController: NavController
+) {
     result?.let {
-        Row(modifier = modifier.padding(bottom = 24.dp)) {
+        Row(
+            modifier = modifier
+                .padding(bottom = 24.dp)
+                .clickable {
+                    sharedStateViewModel.selectedAddress.value = it
+                    bentoViewModel.clearLoadedPlacesDate()
+                    navController.navigate("markerPage")
+                }
+        ) {
             Icon(
                 imageVector = Icons.Outlined.LocationOn,
                 contentDescription = "location",
@@ -296,29 +380,50 @@ fun SearchResultItem(result: Result?, modifier: Modifier = Modifier) {
     }
 }
 
-//@Composable
-//fun HistoryMenu() {
-//    // TODO: click to use current location
-//    Column {
-//        HistoryMenuItem(
-//            historyItemContent = HistoryItemContent(
-//                icon = R.drawable.target,
-//                title = "Use Current Location"
-//            ),
-//            modifier = Modifier.clickable {
-//
-//            }
-//        )
-//        HorizontalDivider()
-//        Text(text = "Recent Searches")
-//        HorizontalDivider()
-//        Text(text = "Saved Addresses")
-//    }
-//}
+@Composable
+fun HistoryMenu(
+    localDatabaseViewModel: LocalDatabaseViewModel,
+    sharedStateViewModel: SharedStateViewModel,
+    navController: NavController
+) {
+    localDatabaseViewModel.getSavedAddresses()
+    val addresses by localDatabaseViewModel.savedAddress.collectAsState()
+    LazyColumn {
+        item {
+            HistoryMenuItem(
+                historyItemContent = HistoryItemContent(
+                    icon = R.drawable.target,
+                    title = "Use Current Location"
+                ),
+                modifier = Modifier.clickable {
+                    sharedStateViewModel.selectedAddress.value = null
+                    navController.navigate("markerPage")
+                }
+            )
+            HorizontalDivider()
+            Text(text = "Saved Addresses")
+        }
+        itemsIndexed(addresses) { index, item ->
+            HistoryMenuItem(
+                historyItemContent = HistoryItemContent(
+                    icon = IconUtl.getIconId(item.addressType),
+                    title = item.name,
+                    description = item.mapAddress
+                ),
+                index = index
+            )
+        }
+
+    }
+}
 
 
 @Composable
-fun HistoryMenuItem(historyItemContent: HistoryItemContent, modifier: Modifier = Modifier) {
+fun HistoryMenuItem(
+    historyItemContent: HistoryItemContent,
+    modifier: Modifier = Modifier,
+    index: Int = -1
+) {
     Row(
         modifier = modifier.padding(bottom = 24.dp),
         verticalAlignment = Alignment.CenterVertically

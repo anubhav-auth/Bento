@@ -1,5 +1,6 @@
 package com.anubhav_auth.bento.userInterface.onboarding
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -49,8 +50,21 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(scope: CoroutineScope,onFinish: () -> Unit) {
-
+fun OnboardingScreen(scope: CoroutineScope,authViewModel: AuthViewModel, navController: NavController, onFinish: () -> Unit) {
+//    val authState by authViewModel.authState.collectAsState()
+//    val context = LocalContext.current
+//
+//    LaunchedEffect(authState) {
+//        when (authState) {
+//            is AuthState.Authenticated -> navController.navigate("loginPage")
+//            is AuthState.Error -> Toast.makeText(
+//                context,
+//                (authState as AuthState.Error).message, Toast.LENGTH_SHORT
+//            ).show()
+//
+//            else -> Unit
+//        }
+//    }
     val pages = listOf(
         OnboardingPageData(
             title = "Welcome to Bento",
@@ -73,6 +87,7 @@ fun OnboardingScreen(scope: CoroutineScope,onFinish: () -> Unit) {
             imageResId = R.drawable.robot_delivery
         )
     )
+
     val pagerState = rememberPagerState(
         pageCount = { pages.size },
     )

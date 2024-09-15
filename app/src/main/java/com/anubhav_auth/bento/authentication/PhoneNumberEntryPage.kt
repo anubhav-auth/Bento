@@ -54,20 +54,6 @@ fun PhoneNumberEntryPage(
     navController: NavHostController
 ) {
     val context = LocalContext.current
-//    val authState by authViewModel.authState.collectAsState()
-//
-//
-//    LaunchedEffect(authState) {
-//        when (authState) {
-//            is AuthState.Authenticated -> navController.navigate("homePage")
-//            is AuthState.Error -> Toast.makeText(
-//                context,
-//                (authState as AuthState.Error).message, Toast.LENGTH_SHORT
-//            ).show()
-//
-//            else -> Unit
-//        }
-//    }
 
     var phonenumber by remember {
         mutableStateOf("")

@@ -14,7 +14,7 @@ class LatLngTypeConvertor {
     fun toLatLng(value: String?):LatLng?{
         return value?.let {
             val parts = it.split(",")
-            LatLng(parts[0].toDouble(), parts[2].toDouble())
+            LatLng(parts[0].toDouble(), parts[1].toDouble())
         }
     }
 }

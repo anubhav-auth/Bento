@@ -8,7 +8,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -40,7 +38,7 @@ import com.anubhav_auth.bento.location.GrantLocationMode
 import com.anubhav_auth.bento.location.LocationViewmodel
 import com.anubhav_auth.bento.location.MarkerLocation
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
-import com.anubhav_auth.bento.userInterface.testPage
+import com.anubhav_auth.bento.userInterface.HomePage
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -89,13 +87,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        var allPermissionGranted by sharedStateViewModel.allPermissionGranted
+        val allPermissionGranted by sharedStateViewModel.allPermissionGranted
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         val requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                allPermissionGranted = permissions.values.all { it }
+                sharedStateViewModel.allPermissionGranted.value = permissions.values.all { it }
             }
 
 
@@ -115,20 +113,21 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     val startDestination = when (authState) {
-                        is AuthState.Authenticated -> "homePage"
+                        is AuthState.Authenticated -> "locationAccessPage"
+                        is AuthState.Error -> "error"
                         else -> "onboarding"
                     }
 
 
                     val navController = rememberNavController()
 
-                    NavHost(navController = navController, startDestination = "markerPage") {
+                    NavHost(navController = navController, startDestination = startDestination) {
                         composable("error") {
                             ErrorScreen(navController)
                         }
                         composable("onboarding") {
-                            OnboardingScreen(scope) {
-                                navController.navigate("locationAccessPage")
+                            OnboardingScreen(scope, authViewModel, navController) {
+                                navController.navigate("loginPage")
                             }
                         }
                         composable("loginPage") {
@@ -159,15 +158,25 @@ class MainActivity : ComponentActivity() {
                             GrantLocationMode(
                                 sharedStateViewModel = sharedStateViewModel,
                                 bentoViewModel = bentoViewModel,
+                                localDatabaseViewModel = localDatabaseViewModel,
                                 requestPermissionLauncher = requestPermissionLauncher,
-                                scope = scope
+                                scope = scope,
+                                navController = navController
                             )
                         }
-                        composable("markerPage"){
-                            MarkerLocation(scope,locationViewmodel,sharedStateViewModel, localDatabaseViewModel, bentoViewModel,fusedLocationProviderClient)
+                        composable("markerPage") {
+                            MarkerLocation(
+                                scope = scope,
+                                locationViewmodel = locationViewmodel,
+                                sharedStateViewModel = sharedStateViewModel,
+                                localDatabaseViewModel = localDatabaseViewModel,
+                                bentoViewModel = bentoViewModel,
+                                fusedLocationProviderClient = fusedLocationProviderClient,
+                                navController = navController
+                            )
                         }
                         composable("homePage") {
-                            testPage()
+                            HomePage()
                         }
                     }
                 }

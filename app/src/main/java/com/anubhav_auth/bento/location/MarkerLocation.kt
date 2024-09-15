@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -59,6 +58,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.SharedStateViewModel
@@ -69,7 +69,6 @@ import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
@@ -89,16 +88,26 @@ fun MarkerLocation(
     sharedStateViewModel: SharedStateViewModel,
     localDatabaseViewModel: LocalDatabaseViewModel,
     bentoViewModel: BentoViewModel,
-    fusedLocationProviderClient: FusedLocationProviderClient
+    fusedLocationProviderClient: FusedLocationProviderClient,
+    navController: NavController
 ) {
+
     val context = LocalContext.current
     locationViewmodel.getLatLang(fusedLocationProviderClient, true)
+    val locationFromSearch by sharedStateViewModel.selectedAddress
 
     val currentLocation by locationViewmodel.latLang.collectAsState()
-    var centerLocation = currentLocation
+    var centerLocation =
+        if (locationFromSearch != null) locationFromSearch!!.geometry.location.let {
+            LatLng(it.lat, it.lng)
+        } else {
+            currentLocation
+        }
+
     LaunchedEffect(Unit) {
         bentoViewModel.loadPLaceDataFromLatLang(centerLocation)
     }
+
     val geoCodeData by bentoViewModel.geocodeData.collectAsState()
 
 
@@ -133,7 +142,7 @@ fun MarkerLocation(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            val focusRequester = List(6){FocusRequester()}
+            val focusRequester = List(6) { FocusRequester() }
 
             var houseNumber by remember { mutableStateOf("") }
             var floorNumber by remember { mutableStateOf("") }
@@ -155,11 +164,13 @@ fun MarkerLocation(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "",
-                            modifier = Modifier.size(27.dp).clickable {
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.hide()
+                            modifier = Modifier
+                                .size(27.dp)
+                                .clickable {
+                                    scope.launch {
+                                        scaffoldState.bottomSheetState.hide()
+                                    }
                                 }
-                            }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
@@ -205,37 +216,42 @@ fun MarkerLocation(
                             valChange = { houseNumber = it },
                             index = 0,
                             focusRequesters = focusRequester,
+                            imeAction = ImeAction.Next
                         )
                         AddressComponentItem(
-                            heading = "Floor number",
                             text = floorNumber,
                             valChange = { floorNumber = it },
+                            heading = "Floor number",
                             index = 1,
-                            focusRequesters = focusRequester
+                            focusRequesters = focusRequester,
+                            imeAction = ImeAction.Next
                         )
                         AddressComponentItem(
-                            heading = "Apartment/ Building name",
                             text = buildingName,
                             valChange = { buildingName = it },
+                            heading = "Apartment/ Building name",
                             index = 2,
-                            focusRequesters = focusRequester
+                            focusRequesters = focusRequester,
+                            imeAction = ImeAction.Next
                         )
                         AddressComponentItem(
-                            heading = "How to reach",
                             text = howToReach,
                             valChange = { howToReach = it },
-                            maxLines = 5,
+                            heading = "How to reach",
                             singleLine = false,
+                            maxLines = 5,
                             index = 3,
-                            focusRequesters = focusRequester
+                            focusRequesters = focusRequester,
+                            imeAction = ImeAction.Default
                         )
                         AddressComponentItem(
-                            heading = "Contact number",
                             text = contactNumber,
                             valChange = { contactNumber = it },
+                            heading = "Contact number",
                             isContact = true,
                             index = 4,
-                            focusRequesters = focusRequester
+                            focusRequesters = focusRequester,
+                            imeAction = ImeAction.Next
                         )
                         AddressComponentItem(
                             heading = "Name",
@@ -243,7 +259,7 @@ fun MarkerLocation(
                             valChange = { name = it },
                             index = 5,
                             focusRequesters = focusRequester,
-                            isLast = true
+                            imeAction = ImeAction.Done
                         )
                         AddressDynamicChipMenu(
                             chipText = AddressTypes.AsStringList(),
@@ -255,18 +271,24 @@ fun MarkerLocation(
                                 .fillMaxWidth()
                                 .height(45.dp),
                             onClick = {
-                                localDatabaseViewModel.saveAddress(
-                                    SavedAddress(
-                                        houseFlatNo = houseNumber,
-                                        floorNo = floorNumber,
-                                        apartmentBuildingName = buildingName,
-                                        howToReach = howToReach,
-                                        contactNumber = contactNumber,
-                                        latLng = centerLocation,
-                                        mapAddress = geo.formatted_address,
-                                        addressType = AddressTypes.entries[sharedStateViewModel.selectedAddressIndex.value]
-                                    )
+                                val address = SavedAddress(
+                                    name = name,
+                                    houseFlatNo = houseNumber,
+                                    floorNo = floorNumber,
+                                    apartmentBuildingName = buildingName,
+                                    howToReach = howToReach,
+                                    contactNumber = contactNumber,
+                                    latLng = centerLocation,
+                                    mapAddress = geo.formatted_address,
+                                    addressType = AddressTypes.entries[sharedStateViewModel.selectedAddressIndex.value]
                                 )
+                                localDatabaseViewModel.saveAddress(
+                                    address
+                                )
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.hide()
+                                }
+                                navController.navigateUp()
                             },
                             shape = RoundedCornerShape(9.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -292,7 +314,7 @@ fun MarkerLocation(
                     tiltGesturesEnabled = false,
                     scrollGesturesEnabledDuringRotateOrZoom = false,
 
-                ),
+                    ),
                 properties = MapProperties(
                     isBuildingEnabled = true,
                     isIndoorEnabled = true,
@@ -300,7 +322,7 @@ fun MarkerLocation(
 
                 ),
                 onMapLoaded = {
-                    currentLocation.let {
+                    centerLocation.let {
                         cameraPositionState.position =
                             CameraPosition.fromLatLngZoom(it, 19.5f)
                     }
@@ -320,7 +342,7 @@ fun MarkerLocation(
                     .border(width = 2.dp, Color.LightGray, shape = RoundedCornerShape(12.dp))
                     .background(Color.White)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.18f)
+                    .fillMaxHeight(0.2f)
             ) {
 
                 geoCodeData?.results?.get(1)?.let {
@@ -386,7 +408,7 @@ fun AddressComponentItem(
     maxLines: Int = 1,
     index: Int,
     focusRequesters: List<FocusRequester>,
-    isLast: Boolean = false
+    imeAction: ImeAction,
 ) {
     var text2 = text
     val phoneNumberRegex = Regex("[^0-9]")
@@ -419,11 +441,11 @@ fun AddressComponentItem(
             maxLines = maxLines,
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (isContact) KeyboardType.Number else KeyboardType.Text,
-                imeAction = if (!isLast) ImeAction.Next else ImeAction.Done
+                imeAction = imeAction
             ),
             keyboardActions = KeyboardActions(
                 onNext = {
-                    focusRequesters[index+1].requestFocus()
+                    focusRequesters[index + 1].requestFocus()
                 }
             ),
             prefix = { if (isContact) Text(text = "+91") }
