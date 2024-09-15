@@ -4,8 +4,11 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -48,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
+import com.anubhav_auth.bento.SharedStateViewModel
+import com.anubhav_auth.bento.database.entities.AddressTypes
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.CameraPosition
@@ -59,12 +66,16 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarkerLocation(
+    scope: CoroutineScope,
     locationViewmodel: LocationViewmodel,
+    sharedStateViewModel: SharedStateViewModel,
     bentoViewModel: BentoViewModel,
     fusedLocationProviderClient: FusedLocationProviderClient
 ) {
@@ -103,7 +114,7 @@ fun MarkerLocation(
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.Expanded,
-            skipHiddenState = false
+            skipHiddenState = true
         )
     )
 
@@ -143,6 +154,10 @@ fun MarkerLocation(
                     AddressComponentItem(heading = "How to reach")
                     AddressComponentItem(heading = "Contact number")
                     AddressComponentItem(heading = "Name")
+                    AddressDynamicChipMenu(chipText = AddressTypes.AsStringList(), sharedStateViewModel = sharedStateViewModel)
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "Save Address")
+                    }
                 }
             }
         },
@@ -164,7 +179,7 @@ fun MarkerLocation(
                     mapType = MapType.NORMAL
                 ),
                 onMapLoaded = {
-                    currentLocation?.let {
+                    currentLocation.let {
                         cameraPositionState.position =
                             CameraPosition.fromLatLngZoom(it, 19.5f)
                     }
@@ -210,7 +225,11 @@ fun MarkerLocation(
                 }
 
                 Button(
-                    onClick = { }
+                    onClick = {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
                 ) {
                     Text(text = "Confirm Location")
                 }
@@ -226,7 +245,7 @@ fun AddressComponentItem(
     heading: String,
     isContact: Boolean = false,
     singleLine: Boolean = true,
-    maxLines:Int = 1
+    maxLines: Int = 1
 ) {
 
 
@@ -255,9 +274,49 @@ fun AddressComponentItem(
             ),
             singleLine = singleLine,
             maxLines = maxLines,
-           keyboardOptions =  KeyboardOptions(
-               keyboardType = if (isContact)KeyboardType.Number else KeyboardType.Text
-           )
+            keyboardOptions = KeyboardOptions(
+                keyboardType = if (isContact) KeyboardType.Number else KeyboardType.Text
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun AddressDynamicChipMenu(chipText: List<String>, sharedStateViewModel: SharedStateViewModel) {
+    FlowRow(
+        modifier = Modifier
+            .padding(8.dp)
+            .wrapContentSize()
+    ) {
+        chipText.forEachIndexed { index, text ->
+            AddressChipItem(text, index, sharedStateViewModel)
+        }
+    }
+}
+
+@Composable
+fun AddressChipItem(text: String, index: Int, sharedStateViewModel: SharedStateViewModel) {
+    Box(
+        modifier = Modifier
+            .padding(start = 6.dp, top = 9.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .clickable {
+                sharedStateViewModel.selectedAddressIndex.value = index
+            }
+            .border(
+                1.dp, if (index == sharedStateViewModel.selectedAddressIndex.value) Color.Green else
+                    Color.Gray, RoundedCornerShape(18.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            fontSize = 9.sp,
+            fontFamily = MyFonts.openSansBold,
+            fontWeight = FontWeight.Bold
         )
     }
 }

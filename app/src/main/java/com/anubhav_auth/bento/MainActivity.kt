@@ -164,7 +164,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("markerPage"){
-                            MarkerLocation(locationViewmodel,bentoViewModel, fusedLocationProviderClient)
+                            MarkerLocation(scope,locationViewmodel,sharedStateViewModel, bentoViewModel,fusedLocationProviderClient)
                         }
                         composable("homePage") {
                             testPage()

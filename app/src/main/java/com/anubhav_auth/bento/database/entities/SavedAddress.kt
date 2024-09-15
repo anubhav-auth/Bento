@@ -17,11 +17,5 @@ data class SavedAddress(
     val contactNumber: Long,
     val latLang: LatLng,
     val mapAddress: String,
-    val addressType: AddressType
+    val addressType: AddressTypes
 )
-
-enum class AddressType{
-    ENUM,
-    OFFICE,
-    OTHERS
-}
