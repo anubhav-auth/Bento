@@ -1,6 +1,8 @@
 package com.anubhav_auth.bento.location
 
+
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,6 +69,7 @@ import com.anubhav_auth.bento.database.entities.AddressTypes
 import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -94,15 +97,20 @@ fun MarkerLocation(
 
     val context = LocalContext.current
     locationViewmodel.getLatLang(fusedLocationProviderClient, true)
-    val locationFromSearch by sharedStateViewModel.selectedAddress
+    val locationFromSearch by sharedStateViewModel.searchedAddress
 
     val currentLocation by locationViewmodel.latLang.collectAsState()
-    var centerLocation =
-        if (locationFromSearch != null) locationFromSearch!!.geometry.location.let {
-            LatLng(it.lat, it.lng)
-        } else {
-            currentLocation
-        }
+
+    var centerLocation by remember {
+        mutableStateOf(LatLng(0.0, 0.0))
+    }
+    centerLocation = if (locationFromSearch != null) locationFromSearch!!.geometry.location.let {
+        LatLng(it.lat, it.lng)
+    } else {
+        currentLocation
+    }
+
+
 
     LaunchedEffect(Unit) {
         bentoViewModel.loadPLaceDataFromLatLang(centerLocation)
@@ -112,9 +120,11 @@ fun MarkerLocation(
 
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 15f)
+        position = CameraPosition.fromLatLngZoom(LatLng(0.0,0.0), 15f)
     }
-
+    val sheetCameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(0.0,0.0), 19.25f)
+    }
     LaunchedEffect(locationViewmodel.showErrorChannel) {
         locationViewmodel.showErrorChannel.collectLatest { show ->
             if (show) {
@@ -122,6 +132,7 @@ fun MarkerLocation(
             }
         }
     }
+    val sheetMarker = rememberMarkerState(position = LatLng(0.0,0.0))
 
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
@@ -129,6 +140,8 @@ fun MarkerLocation(
 
             centerLocation.let { location ->
                 bentoViewModel.loadPLaceDataFromLatLang(location)
+                sheetCameraPositionState.move(CameraUpdateFactory.newLatLng(centerLocation))
+                sheetMarker.position = centerLocation
             }
         }
     }
@@ -138,6 +151,16 @@ fun MarkerLocation(
             skipHiddenState = false
         )
     )
+
+    BackHandler {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded){
+            scope.launch {
+                scaffoldState.bottomSheetState.hide()
+            }
+        }else{
+            navController.navigateUp()
+        }
+    }
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -150,10 +173,6 @@ fun MarkerLocation(
             var howToReach by remember { mutableStateOf("") }
             var contactNumber by remember { mutableStateOf("") }
             var name by remember { mutableStateOf("") }
-
-            val sheetCameraPosition = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(centerLocation, 19.5f)
-            }
             geoCodeData?.results?.get(1)?.let { geo ->
                 LazyColumn(
                     horizontalAlignment = Alignment.Start, modifier = Modifier
@@ -179,11 +198,14 @@ fun MarkerLocation(
                             fontFamily = MyFonts.montserrat_semi_bold
                         )
                         Spacer(modifier = Modifier.height(9.dp))
+
+
+
                         GoogleMap(
-                            cameraPositionState = sheetCameraPosition,
+                            cameraPositionState = sheetCameraPositionState,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp),
+                                .height(170.dp),
                             uiSettings = MapUiSettings(
                                 compassEnabled = false,
                                 zoomControlsEnabled = false,
@@ -194,7 +216,7 @@ fun MarkerLocation(
                             )
                         ) {
                             Marker(
-                                state = rememberMarkerState(position = centerLocation)
+                                state = sheetMarker
                             )
                         }
                         Spacer(modifier = Modifier.height(24.dp))
@@ -283,7 +305,8 @@ fun MarkerLocation(
                                     addressType = AddressTypes.entries[sharedStateViewModel.selectedAddressIndex.value]
                                 )
                                 localDatabaseViewModel.saveAddress(
-                                    address
+                                    address,
+                                    context
                                 )
                                 scope.launch {
                                     scaffoldState.bottomSheetState.hide()
@@ -312,14 +335,11 @@ fun MarkerLocation(
                 uiSettings = MapUiSettings(
                     zoomControlsEnabled = false,
                     tiltGesturesEnabled = false,
-                    scrollGesturesEnabledDuringRotateOrZoom = false,
-
-                    ),
+                    scrollGesturesEnabledDuringRotateOrZoom = false),
                 properties = MapProperties(
                     isBuildingEnabled = true,
                     isIndoorEnabled = true,
                     mapType = MapType.NORMAL
-
                 ),
                 onMapLoaded = {
                     centerLocation.let {
@@ -333,6 +353,7 @@ fun MarkerLocation(
                 contentDescription = "Center Marker",
                 modifier = Modifier
                     .align(Alignment.Center)
+                    .padding(bottom = 42.dp)
                     .size(50.dp)
             )
             Box(

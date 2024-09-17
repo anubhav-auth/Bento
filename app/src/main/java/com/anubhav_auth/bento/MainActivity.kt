@@ -1,22 +1,30 @@
 package com.anubhav_auth.bento
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
+import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
@@ -37,8 +45,9 @@ import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.location.GrantLocationMode
 import com.anubhav_auth.bento.location.LocationViewmodel
 import com.anubhav_auth.bento.location.MarkerLocation
-import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
+import com.anubhav_auth.bento.location.SheetSearch
 import com.anubhav_auth.bento.userInterface.HomePage
+import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -83,6 +92,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+    @RequiresApi(Build.VERSION_CODES.S)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -102,19 +113,24 @@ class MainActivity : ComponentActivity() {
 
             val scope = rememberCoroutineScope()
             val authState by authViewModel.authState.collectAsState()
-
-
-
+            val savedAddress by localDatabaseViewModel.savedAddress.collectAsState()
+            var isLoading by remember {
+                mutableStateOf(true)
+            }
+            LaunchedEffect(savedAddress) {
+                isLoading = false
+            }
             Scaffold { paddingVal ->
                 Box(
                     modifier = Modifier
                         .background(MaterialTheme.colorScheme.background)
                         .padding(paddingVal)
                 ) {
-
-                    val startDestination = when (authState) {
-                        is AuthState.Authenticated -> "locationAccessPage"
-                        is AuthState.Error -> "error"
+                    val startDestination = when {
+                        isLoading -> "splashScreen"
+                        authState is AuthState.Authenticated && savedAddress.isNotEmpty() -> "homePage"
+                        authState is AuthState.Authenticated -> "locationAccessPage"
+                        authState is AuthState.Error -> "error"
                         else -> "onboarding"
                     }
 
@@ -122,6 +138,9 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
 
                     NavHost(navController = navController, startDestination = startDestination) {
+                        composable("splashScreen"){
+                            splashScreen
+                        }
                         composable("error") {
                             ErrorScreen(navController)
                         }
@@ -176,7 +195,23 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("homePage") {
-                            HomePage()
+                            HomePage(
+                                sharedStateViewModel,
+                                localDatabaseViewModel,
+                                scope,
+                                bentoViewModel,
+                                navController
+                            )
+                        }
+                        composable("sheetSearch") {
+                            SheetSearch(
+                                scope = scope,
+                                scaffoldState = null,
+                                sharedStateViewModel = sharedStateViewModel,
+                                bentoViewModel = bentoViewModel,
+                                localDatabaseViewModel = localDatabaseViewModel,
+                                navController = navController
+                            )
                         }
                     }
                 }

@@ -9,7 +9,7 @@ import com.google.android.gms.maps.model.LatLng
 @Entity
 data class SavedAddress(
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    val id: Long = 0,
     val name: String,
     val houseFlatNo: String,
     val floorNo: String,

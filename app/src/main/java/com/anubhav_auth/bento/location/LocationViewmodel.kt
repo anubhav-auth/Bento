@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 
 class LocationViewmodel : ViewModel() {
     private val tag = "mytag"
-
     private val _latLang = MutableStateFlow<LatLng>(LatLng(20.245733, 85.801615))
     val latLang = _latLang.asStateFlow()
 

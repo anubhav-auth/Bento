@@ -9,8 +9,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SavedAddressDAO {
+
     @Upsert
-    suspend fun upsertAddress(savedAddress: SavedAddress)
+    suspend fun upsertAddress(savedAddress: SavedAddress):Long
 
     @Delete
     suspend fun deleteAddress(savedAddress: SavedAddress)

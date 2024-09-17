@@ -1,6 +1,5 @@
 package com.anubhav_auth.bento.location
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
@@ -37,6 +36,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -58,6 +59,7 @@ import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.SharedStateViewModel
 import com.anubhav_auth.bento.database.IconUtl
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
+import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.database.entities.placesData.PlacesData
 import com.anubhav_auth.bento.database.entities.placesData.Result
 import com.anubhav_auth.bento.ui.theme.MyFonts
@@ -77,14 +79,12 @@ fun GrantLocationMode(
     localDatabaseViewModel.getSavedAddresses()
     val savedAddress by localDatabaseViewModel.savedAddress.collectAsState()
 
-    Log.d("mytag", savedAddress.toString())
-
-//    if (savedAddress.isNotEmpty()){
+//    if (savedAddress.isNotEmpty()) {
 //        navController.navigate("homePage")
 //    }
 //
-//    LaunchedEffect(Unit) {
-//        if (savedAddress.isNotEmpty()){
+//    LaunchedEffect(savedAddress) {
+//        if (savedAddress.isNotEmpty()) {
 //            navController.navigate("homePage")
 //        }
 //    }
@@ -100,8 +100,12 @@ fun GrantLocationMode(
     )
 
     BackHandler {
-        scope.launch {
-            scaffoldState.bottomSheetState.hide()
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded){
+            scope.launch {
+                scaffoldState.bottomSheetState.hide()
+            }
+        }else{
+            navController.navigateUp()
         }
     }
 
@@ -235,7 +239,7 @@ fun LocationChoice(
 @Composable
 fun SheetSearch(
     scope: CoroutineScope,
-    scaffoldState: BottomSheetScaffoldState,
+    scaffoldState: BottomSheetScaffoldState?,
     sharedStateViewModel: SharedStateViewModel,
     bentoViewModel: BentoViewModel,
     localDatabaseViewModel: LocalDatabaseViewModel,
@@ -258,8 +262,12 @@ fun SheetSearch(
             contentDescription = "",
             modifier = Modifier
                 .clickable {
-                    scope.launch {
-                        scaffoldState.bottomSheetState.hide()
+                    if (scaffoldState != null) {
+                        scope.launch {
+                            scaffoldState.bottomSheetState.hide()
+                        }
+                    } else {
+                        navController.navigateUp()
                     }
                 }
         )
@@ -301,7 +309,7 @@ fun SheetSearch(
 
         )
         Spacer(modifier = Modifier.height(24.dp))
-        if (placesData == null) {
+        if (placesData == null || searchText.isEmpty()) {
             HistoryMenu(
                 localDatabaseViewModel = localDatabaseViewModel,
                 sharedStateViewModel,
@@ -357,7 +365,7 @@ fun SearchResultItem(
             modifier = modifier
                 .padding(bottom = 24.dp)
                 .clickable {
-                    sharedStateViewModel.selectedAddress.value = it
+                    sharedStateViewModel.searchedAddress.value = it
                     bentoViewModel.clearLoadedPlacesDate()
                     navController.navigate("markerPage")
                 }
@@ -379,38 +387,66 @@ fun SearchResultItem(
         }
     }
 }
-
+fun sortItemsByStoredId(items: List<SavedAddress>, storedId: Long?): List<SavedAddress> {
+    return if (storedId != null) {
+        items.sortedByDescending { it.id == storedId }
+    } else {
+        items
+    }
+}
 @Composable
 fun HistoryMenu(
     localDatabaseViewModel: LocalDatabaseViewModel,
     sharedStateViewModel: SharedStateViewModel,
     navController: NavController
 ) {
+    val context = LocalContext.current
+    val fromLocationShared = getFromLocationShared(context)
     localDatabaseViewModel.getSavedAddresses()
     val addresses by localDatabaseViewModel.savedAddress.collectAsState()
+
+    val storedId = remember {
+        getFromLocationShared(context)
+    }
+    val sortedAddresses = remember(addresses, storedId) {
+        sortItemsByStoredId(addresses, storedId)
+    }
+
     LazyColumn {
         item {
             HistoryMenuItem(
                 historyItemContent = HistoryItemContent(
                     icon = R.drawable.target,
-                    title = "Use Current Location"
+                    title = "Use Current Location",
+                    index = null,
+                    item = null
                 ),
                 modifier = Modifier.clickable {
-                    sharedStateViewModel.selectedAddress.value = null
+                    sharedStateViewModel.searchedAddress.value = null
                     navController.navigate("markerPage")
                 }
             )
             HorizontalDivider()
-            Text(text = "Saved Addresses")
+            Spacer(modifier = Modifier.height(21.dp))
+            Text(text = "Saved Addresses", fontSize = 18.sp, fontWeight = FontWeight.W500)
+            Spacer(modifier = Modifier.height(18.dp))
         }
-        itemsIndexed(addresses) { index, item ->
+
+        itemsIndexed(sortedAddresses) { index, item ->
             HistoryMenuItem(
                 historyItemContent = HistoryItemContent(
+                    item = item,
                     icon = IconUtl.getIconId(item.addressType),
                     title = item.name,
-                    description = item.mapAddress
+                    description = item.mapAddress,
+                    index = fromLocationShared
                 ),
-                index = index
+                modifier = Modifier.clickable {
+                    navController.navigate("homePage"){
+                        popUpTo("sheetSearch"){inclusive = true}
+                    }
+                    saveToLocationShared(context, item.id)
+                }
             )
         }
 
@@ -421,23 +457,25 @@ fun HistoryMenu(
 @Composable
 fun HistoryMenuItem(
     historyItemContent: HistoryItemContent,
-    modifier: Modifier = Modifier,
-    index: Int = -1
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.padding(bottom = 24.dp),
+        modifier = modifier
+            .padding(bottom = 24.dp)
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = historyItemContent.icon),
             contentDescription = "",
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(27.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(text = historyItemContent.title, fontSize = 15.sp, fontWeight = FontWeight.W500)
+            Text(text = historyItemContent.title, fontSize = 15.sp, fontWeight = FontWeight.W500, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (historyItemContent.description != null) {
-                Text(text = historyItemContent.description)
+                Text(text = historyItemContent.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -447,6 +485,8 @@ data class HistoryItemContent(
     val icon: Int,
     val title: String,
     val description: String? = null,
+    val index: Long?,
+    val item: SavedAddress?,
 )
 
 

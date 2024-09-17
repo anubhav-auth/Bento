@@ -1,19 +1,15 @@
 package com.anubhav_auth.bento.database
 
+import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anubhav_auth.bento.database.daos.SavedAddressDAO
 import com.anubhav_auth.bento.database.entities.SavedAddress
+import com.anubhav_auth.bento.location.saveToLocationShared
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,9 +20,16 @@ class LocalDatabaseViewModel(
     private val _savedAddresses = MutableStateFlow<List<SavedAddress>>(emptyList())
     val savedAddress = _savedAddresses.asStateFlow()
 
-    fun getSavedAddresses(){
+    private val _lastSavedAddressId = MutableStateFlow<Long?>(null)
+    val lastSavedAddressId = _lastSavedAddressId.asStateFlow()
+
+    init {
+        getSavedAddresses()
+    }
+
+    fun getSavedAddresses() {
         viewModelScope.launch {
-            savedAddressDAO.getAllAddresses().collectLatest { data->
+            savedAddressDAO.getAllAddresses().collectLatest { data ->
                 _savedAddresses.update {
                     data
                 }
@@ -34,9 +37,11 @@ class LocalDatabaseViewModel(
         }
     }
 
-    fun saveAddress(address: SavedAddress) {
+    fun saveAddress(address: SavedAddress, context: Context) {
         viewModelScope.launch {
-            savedAddressDAO.upsertAddress(address)
+            val a = savedAddressDAO.upsertAddress(address)
+            Log.d("mytag", a.toString())
+            saveToLocationShared(context, a)
         }
     }
 
