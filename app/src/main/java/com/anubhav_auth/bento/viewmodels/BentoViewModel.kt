@@ -1,6 +1,5 @@
-package com.anubhav_auth.bento
+package com.anubhav_auth.bento.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anubhav_auth.bento.api.BentoApiRepository
@@ -15,11 +14,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class BentoViewModel(
     private val bentoApiRepository: BentoApiRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _placesData = MutableStateFlow<PlacesData?>(null)
     val placesData = _placesData.asStateFlow()
@@ -34,31 +32,32 @@ class BentoViewModel(
 
     fun loadPlacesData(
         searchString: String
-    ){
+    ) {
         if (!isLoading) {
             isLoading = true
             viewModelScope.launch {
-               bentoApiRepository.getPlacesFromText(query = searchString).collectLatest { result->
-                   when(result){
-                       is Response.Error -> {
-                           _showErrorChannel.send(true)
-                           isLoading = false
-                       }
-                       is Response.Success -> {
-                           result.data?.let {data->
-                               _placesData.update {
-                                   data
-                               }
-                           }
-                           isLoading = false
-                       }
-                   }
-               }
+                bentoApiRepository.getPlacesFromText(query = searchString).collectLatest { result ->
+                    when (result) {
+                        is Response.Error -> {
+                            _showErrorChannel.send(true)
+                            isLoading = false
+                        }
+
+                        is Response.Success -> {
+                            result.data?.let { data ->
+                                _placesData.update {
+                                    data
+                                }
+                            }
+                            isLoading = false
+                        }
+                    }
+                }
             }
         }
     }
 
-    fun clearLoadedPlacesDate(){
+    fun clearLoadedPlacesDate() {
         _placesData.update {
             null
         }
@@ -66,24 +65,26 @@ class BentoViewModel(
 
     fun loadPLaceDataFromLatLang(
         latLng: LatLng
-    ){
-        if (!isLoading){
+    ) {
+        if (!isLoading) {
             isLoading = true
             viewModelScope.launch {
-                bentoApiRepository.getPlaceFromLatLng("${latLng.latitude},${latLng.longitude}").collectLatest { result->
-                    when(result){
-                        is Response.Error -> {
-                            _showErrorChannel.send(true)
-                            isLoading = false
-                        }
-                        is Response.Success -> {
-                            _geocodeData.update {
-                                result.data
+                bentoApiRepository.getPlaceFromLatLng("${latLng.latitude},${latLng.longitude}")
+                    .collectLatest { result ->
+                        when (result) {
+                            is Response.Error -> {
+                                _showErrorChannel.send(true)
+                                isLoading = false
                             }
-                            isLoading = false
+
+                            is Response.Success -> {
+                                _geocodeData.update {
+                                    result.data
+                                }
+                                isLoading = false
+                            }
                         }
                     }
-                }
             }
         }
     }

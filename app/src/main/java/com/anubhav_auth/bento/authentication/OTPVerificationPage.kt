@@ -1,11 +1,8 @@
 package com.anubhav_auth.bento.authentication
 
 import android.os.CountDownTimer
-import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,14 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,7 +51,7 @@ import com.anubhav_auth.bento.ui.theme.MyFonts
 fun OTPVerificationPage(
     otpLength: Int = 6,
     navController: NavController,
-    phoneNumber:String = "0000000000",
+    phoneNumber: String = "0000000000",
     authViewModel: AuthViewModel
 ) {
     val context = LocalContext.current
@@ -76,10 +71,10 @@ fun OTPVerificationPage(
         }
     }
 
-    val onContinue:() -> Unit = {
-        if (otpValues.joinToString("").length < 6 || otpValues.joinToString("").length > 6){
+    val onContinue: () -> Unit = {
+        if (otpValues.joinToString("").length < 6 || otpValues.joinToString("").length > 6) {
             Toast.makeText(context, "Enter the OTP correctly", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             authViewModel.verifyCode(otpValues.joinToString(""))
         }
     }
@@ -176,14 +171,15 @@ fun OTPVerificationPage(
 
 
         }
-        Column(modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .imePadding()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+        ) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(45.dp)
-                ,
+                    .height(45.dp),
                 onClick = {
                     onContinue()
                 },

@@ -4,7 +4,8 @@ import android.content.Context
 import android.util.Log
 
 fun saveToLocationShared(context: Context, value: Long) {
-    val sharedPreferences = context.getSharedPreferences("com.anubhav_auth.bento", Context.MODE_PRIVATE)
+    val sharedPreferences =
+        context.getSharedPreferences("com.anubhav_auth.bento", Context.MODE_PRIVATE)
     Log.d("mytag", "$value")
     sharedPreferences
         .edit()
@@ -13,7 +14,8 @@ fun saveToLocationShared(context: Context, value: Long) {
 }
 
 fun getFromLocationShared(context: Context, defaultValue: Long = -1): Long {
-    val sharedPreferences = context.getSharedPreferences("com.anubhav_auth.bento", Context.MODE_PRIVATE)
-    
+    val sharedPreferences =
+        context.getSharedPreferences("com.anubhav_auth.bento", Context.MODE_PRIVATE)
+
     return sharedPreferences.getLong("selected_address", defaultValue)
 }

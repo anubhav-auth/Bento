@@ -22,8 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,18 +58,20 @@ fun PhoneNumberEntryPage(
     }
     val phoneNumberRegex = Regex("[^0-9]")
 
-    val onContinue:() -> Unit = {
-        if (phonenumber.length < 10){
+    val onContinue: () -> Unit = {
+        if (phonenumber.length < 10) {
             Toast.makeText(context, "Enter a valid Phone Number", Toast.LENGTH_SHORT).show()
-        }else{
+        } else {
             navController.navigate("otpPage/${phonenumber}")
             authViewModel.verifyPhoneNumber("+91$phonenumber", context)
         }
     }
 
-    Box(modifier = Modifier
-        .padding(15.dp)
-        .fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .padding(15.dp)
+            .fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -156,9 +156,11 @@ fun PhoneNumberEntryPage(
             }
 
         }
-        Column(modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .imePadding()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+        ) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -174,13 +176,15 @@ fun PhoneNumberEntryPage(
                 Text(text = "Continue", fontSize = 18.sp)
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Text(text = "By clicking, I accept the Terms & Conditions & Privacy Policy", fontSize = 12.sp)
+            Text(
+                text = "By clicking, I accept the Terms & Conditions & Privacy Policy",
+                fontSize = 12.sp
+            )
         }
 
 
     }
 }
-
 
 
 class SpaceAfterFiveDigitsTransformation : VisualTransformation {

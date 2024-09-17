@@ -61,13 +61,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
-import com.anubhav_auth.bento.SharedStateViewModel
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.database.entities.AddressTypes
 import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.ui.theme.MyFonts
+import com.anubhav_auth.bento.viewmodels.BentoViewModel
+import com.anubhav_auth.bento.viewmodels.SharedStateViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -120,10 +120,10 @@ fun MarkerLocation(
 
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(0.0,0.0), 15f)
+        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 15f)
     }
     val sheetCameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(0.0,0.0), 19.25f)
+        position = CameraPosition.fromLatLngZoom(LatLng(0.0, 0.0), 19.25f)
     }
     LaunchedEffect(locationViewmodel.showErrorChannel) {
         locationViewmodel.showErrorChannel.collectLatest { show ->
@@ -132,7 +132,7 @@ fun MarkerLocation(
             }
         }
     }
-    val sheetMarker = rememberMarkerState(position = LatLng(0.0,0.0))
+    val sheetMarker = rememberMarkerState(position = LatLng(0.0, 0.0))
 
     LaunchedEffect(cameraPositionState.isMoving) {
         if (!cameraPositionState.isMoving) {
@@ -153,11 +153,11 @@ fun MarkerLocation(
     )
 
     BackHandler {
-        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded){
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
             scope.launch {
                 scaffoldState.bottomSheetState.hide()
             }
-        }else{
+        } else {
             navController.navigateUp()
         }
     }
@@ -335,7 +335,8 @@ fun MarkerLocation(
                 uiSettings = MapUiSettings(
                     zoomControlsEnabled = false,
                     tiltGesturesEnabled = false,
-                    scrollGesturesEnabledDuringRotateOrZoom = false),
+                    scrollGesturesEnabledDuringRotateOrZoom = false
+                ),
                 properties = MapProperties(
                     isBuildingEnabled = true,
                     isIndoorEnabled = true,

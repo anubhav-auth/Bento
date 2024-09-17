@@ -9,6 +9,6 @@ import com.anubhav_auth.bento.database.entities.SavedAddress
 
 @Database(entities = [SavedAddress::class], version = 1)
 @TypeConverters(LatLngTypeConvertor::class)
-abstract class BentoDatabase: RoomDatabase() {
+abstract class BentoDatabase : RoomDatabase() {
     abstract fun savedAddressDao(): SavedAddressDAO
 }

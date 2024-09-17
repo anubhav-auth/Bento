@@ -36,7 +36,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,15 +53,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.anubhav_auth.bento.BentoViewModel
 import com.anubhav_auth.bento.R
-import com.anubhav_auth.bento.SharedStateViewModel
 import com.anubhav_auth.bento.database.IconUtl
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
 import com.anubhav_auth.bento.database.entities.SavedAddress
 import com.anubhav_auth.bento.database.entities.placesData.PlacesData
 import com.anubhav_auth.bento.database.entities.placesData.Result
 import com.anubhav_auth.bento.ui.theme.MyFonts
+import com.anubhav_auth.bento.viewmodels.BentoViewModel
+import com.anubhav_auth.bento.viewmodels.SharedStateViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -100,11 +99,11 @@ fun GrantLocationMode(
     )
 
     BackHandler {
-        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded){
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
             scope.launch {
                 scaffoldState.bottomSheetState.hide()
             }
-        }else{
+        } else {
             navController.navigateUp()
         }
     }
@@ -387,6 +386,7 @@ fun SearchResultItem(
         }
     }
 }
+
 fun sortItemsByStoredId(items: List<SavedAddress>, storedId: Long?): List<SavedAddress> {
     return if (storedId != null) {
         items.sortedByDescending { it.id == storedId }
@@ -394,6 +394,7 @@ fun sortItemsByStoredId(items: List<SavedAddress>, storedId: Long?): List<SavedA
         items
     }
 }
+
 @Composable
 fun HistoryMenu(
     localDatabaseViewModel: LocalDatabaseViewModel,
@@ -442,8 +443,8 @@ fun HistoryMenu(
                     index = fromLocationShared
                 ),
                 modifier = Modifier.clickable {
-                    navController.navigate("homePage"){
-                        popUpTo("sheetSearch"){inclusive = true}
+                    navController.navigate("homePage") {
+                        popUpTo("sheetSearch") { inclusive = true }
                     }
                     saveToLocationShared(context, item.id)
                 }
@@ -473,9 +474,19 @@ fun HistoryMenuItem(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column {
-            Text(text = historyItemContent.title, fontSize = 15.sp, fontWeight = FontWeight.W500, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                text = historyItemContent.title,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.W500,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             if (historyItemContent.description != null) {
-                Text(text = historyItemContent.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = historyItemContent.description,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

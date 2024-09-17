@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento
+package com.anubhav_auth.bento.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

@@ -2,7 +2,6 @@ package com.anubhav_auth.bento.database.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.anubhav_auth.bento.database.entities.placesData.Geometry
 import com.google.android.gms.maps.model.LatLng
 
 

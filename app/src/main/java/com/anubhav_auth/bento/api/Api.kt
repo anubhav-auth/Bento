@@ -1,6 +1,5 @@
 package com.anubhav_auth.bento.api
 
-import com.anubhav_auth.bento.BuildConfig
 import com.anubhav_auth.bento.database.entities.geocodeData.GeocodeData
 import com.anubhav_auth.bento.database.entities.placesData.PlacesData
 import retrofit2.http.GET
@@ -11,7 +10,7 @@ interface Api {
 
     @GET
     suspend fun findPlace(
-        @Url url : String,
+        @Url url: String,
         @Query("query") input: String,
         @Query("key") apiKey: String
     ): PlacesData
@@ -23,7 +22,7 @@ interface Api {
         @Query("key") apiKey: String
     ): GeocodeData
 
-    companion object{
+    companion object {
         const val BASE_URL_PLACES = "https://maps.googleapis.com/"
     }
 }

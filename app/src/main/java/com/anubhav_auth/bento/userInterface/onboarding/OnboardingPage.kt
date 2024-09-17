@@ -1,7 +1,5 @@
 package com.anubhav_auth.bento.userInterface.onboarding
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,13 +26,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.anubhav_auth.bento.R
-import com.anubhav_auth.bento.authentication.AuthState
 import com.anubhav_auth.bento.authentication.AuthViewModel
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +43,12 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingScreen(scope: CoroutineScope,authViewModel: AuthViewModel, navController: NavController, onFinish: () -> Unit) {
+fun OnboardingScreen(
+    scope: CoroutineScope,
+    authViewModel: AuthViewModel,
+    navController: NavController,
+    onFinish: () -> Unit
+) {
 //    val authState by authViewModel.authState.collectAsState()
 //    val context = LocalContext.current
 //

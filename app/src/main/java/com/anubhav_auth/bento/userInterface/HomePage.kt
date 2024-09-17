@@ -27,12 +27,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.anubhav_auth.bento.BentoViewModel
-import com.anubhav_auth.bento.SharedStateViewModel
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
-import com.anubhav_auth.bento.location.SheetSearch
 import com.anubhav_auth.bento.location.getFromLocationShared
 import com.anubhav_auth.bento.ui.theme.MyFonts
+import com.anubhav_auth.bento.viewmodels.BentoViewModel
+import com.anubhav_auth.bento.viewmodels.SharedStateViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalMaterial3Api::class)

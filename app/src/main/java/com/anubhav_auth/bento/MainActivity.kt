@@ -3,7 +3,6 @@ package com.anubhav_auth.bento
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
-import android.window.SplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -48,6 +47,8 @@ import com.anubhav_auth.bento.location.MarkerLocation
 import com.anubhav_auth.bento.location.SheetSearch
 import com.anubhav_auth.bento.userInterface.HomePage
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
+import com.anubhav_auth.bento.viewmodels.BentoViewModel
+import com.anubhav_auth.bento.viewmodels.SharedStateViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -138,7 +139,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
 
                     NavHost(navController = navController, startDestination = startDestination) {
-                        composable("splashScreen"){
+                        composable("splashScreen") {
                             splashScreen
                         }
                         composable("error") {

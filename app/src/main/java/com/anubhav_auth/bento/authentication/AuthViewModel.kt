@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.concurrent.TimeUnit
 
-class AuthViewModel: ViewModel() {
+class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
     private val tag = "AUTH"
     private var storedVerificationId: String? = null
@@ -32,7 +32,7 @@ class AuthViewModel: ViewModel() {
         checkAuthStatus()
     }
 
-    private val callbacks = object:PhoneAuthProvider.OnVerificationStateChangedCallbacks(){
+    private val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
         override fun onVerificationCompleted(credential: PhoneAuthCredential) {
             Log.d(tag, "onVerificationCompleted:$credential")

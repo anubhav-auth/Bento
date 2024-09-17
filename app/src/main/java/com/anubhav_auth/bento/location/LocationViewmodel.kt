@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,16 +32,16 @@ class LocationViewmodel : ViewModel() {
         else Priority.PRIORITY_BALANCED_POWER_ACCURACY
 
         fusedLocationProviderClient.getCurrentLocation(accuracy, CancellationTokenSource().token)
-            .addOnSuccessListener { location->
+            .addOnSuccessListener { location ->
                 _latLang.update {
                     LatLng(location.latitude, location.longitude)
                 }
             }
-            .addOnFailureListener{ e->
+            .addOnFailureListener { e ->
                 viewModelScope.launch {
                     _showErrorChannel.send(true)
                 }
-                Log.d(tag,"Exception in getting current Location")
+                Log.d(tag, "Exception in getting current Location")
             }
     }
 
@@ -55,16 +54,16 @@ class LocationViewmodel : ViewModel() {
         else Priority.PRIORITY_BALANCED_POWER_ACCURACY
 
         fusedLocationProviderClient.lastLocation
-            .addOnSuccessListener { location->
+            .addOnSuccessListener { location ->
                 _latLang.update {
                     LatLng(location.latitude, location.longitude)
                 }
             }
-            .addOnFailureListener{ e->
+            .addOnFailureListener { e ->
                 viewModelScope.launch {
                     _showErrorChannel.send(true)
                 }
-                Log.d(tag,"Exception in getting current Location")
+                Log.d(tag, "Exception in getting current Location")
             }
 
     }
