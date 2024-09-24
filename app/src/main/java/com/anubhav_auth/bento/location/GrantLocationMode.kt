@@ -56,9 +56,9 @@ import androidx.navigation.NavController
 import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.database.IconUtl
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
-import com.anubhav_auth.bento.database.entities.SavedAddress
-import com.anubhav_auth.bento.database.entities.placesData.PlacesData
-import com.anubhav_auth.bento.database.entities.placesData.Result
+import com.anubhav_auth.bento.entities.SavedAddress
+import com.anubhav_auth.bento.entities.placesData.PlacesData
+import com.anubhav_auth.bento.entities.placesData.Result
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.anubhav_auth.bento.viewmodels.BentoViewModel
 import com.anubhav_auth.bento.viewmodels.SharedStateViewModel

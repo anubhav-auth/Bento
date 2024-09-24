@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anubhav_auth.bento.database.daos.SavedAddressDAO
-import com.anubhav_auth.bento.database.entities.SavedAddress
+import com.anubhav_auth.bento.entities.SavedAddress
 import com.anubhav_auth.bento.location.saveToLocationShared
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,7 +40,6 @@ class LocalDatabaseViewModel(
     fun saveAddress(address: SavedAddress, context: Context) {
         viewModelScope.launch {
             val a = savedAddressDAO.upsertAddress(address)
-            Log.d("mytag", a.toString())
             saveToLocationShared(context, a)
         }
     }

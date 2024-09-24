@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento.database.entities.placesData
+package com.anubhav_auth.bento.entities.placesData
 
 data class PlusCode(
     val compound_code: String,

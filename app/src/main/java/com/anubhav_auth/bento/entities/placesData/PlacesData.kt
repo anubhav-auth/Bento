@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento.database.entities.placesData
+package com.anubhav_auth.bento.entities.placesData
 
 data class PlacesData(
     val html_attributions: List<Any>,

@@ -63,8 +63,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.anubhav_auth.bento.R
 import com.anubhav_auth.bento.database.LocalDatabaseViewModel
-import com.anubhav_auth.bento.database.entities.AddressTypes
-import com.anubhav_auth.bento.database.entities.SavedAddress
+import com.anubhav_auth.bento.entities.AddressTypes
+import com.anubhav_auth.bento.entities.SavedAddress
 import com.anubhav_auth.bento.ui.theme.MyFonts
 import com.anubhav_auth.bento.viewmodels.BentoViewModel
 import com.anubhav_auth.bento.viewmodels.SharedStateViewModel

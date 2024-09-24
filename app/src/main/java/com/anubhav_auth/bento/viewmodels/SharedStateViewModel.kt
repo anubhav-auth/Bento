@@ -2,7 +2,7 @@ package com.anubhav_auth.bento.viewmodels
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.anubhav_auth.bento.database.entities.placesData.Result
+import com.anubhav_auth.bento.entities.placesData.Result
 
 class SharedStateViewModel : ViewModel() {
 

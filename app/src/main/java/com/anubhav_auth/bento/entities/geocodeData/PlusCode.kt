@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento.database.entities.geocodeData
+package com.anubhav_auth.bento.entities.geocodeData
 
 import com.squareup.moshi.Json
 

@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento.database.entities.placesData
+package com.anubhav_auth.bento.entities.geocodeData
 
 data class Location(
     val lat: Double,

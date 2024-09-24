@@ -1,11 +1,15 @@
 package com.anubhav_auth.bento.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.anubhav_auth.bento.api.BentoApiRepository
 import com.anubhav_auth.bento.api.Response
-import com.anubhav_auth.bento.database.entities.geocodeData.GeocodeData
-import com.anubhav_auth.bento.database.entities.placesData.PlacesData
+import com.anubhav_auth.bento.entities.backendRecieved.menuEntity.MenuItemItem
+import com.anubhav_auth.bento.entities.backendRecieved.restaurantEntity.RestaurantEntityItem
+import com.anubhav_auth.bento.entities.backendRecieved.restaurantEntity.Restaurants
+import com.anubhav_auth.bento.entities.geocodeData.GeocodeData
+import com.anubhav_auth.bento.entities.placesData.PlacesData
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,10 +29,21 @@ class BentoViewModel(
     private val _geocodeData = MutableStateFlow<GeocodeData?>(null)
     val geocodeData = _geocodeData.asStateFlow()
 
+    private val _allRestaurantData = MutableStateFlow<List<RestaurantEntityItem>>(emptyList())
+    val allRestaurantData = _allRestaurantData.asStateFlow()
+
+    private val _menuData = MutableStateFlow<List<MenuItemItem>>(emptyList())
+    val menuData = _menuData.asStateFlow()
+
     private var isLoading = false //added this so the query doest run if a data is being loaded
 
     private val _showErrorChannel = Channel<Boolean>()
     val showErrorChannel = _showErrorChannel.receiveAsFlow()
+
+    init {
+        loadAllRestaurantData()
+        Log.d("mytag1", allRestaurantData.toString())
+    }
 
     fun loadPlacesData(
         searchString: String
@@ -85,6 +100,56 @@ class BentoViewModel(
                             }
                         }
                     }
+            }
+        }
+    }
+
+    fun loadAllRestaurantData(){
+        if (!isLoading) {
+            isLoading = true
+            viewModelScope.launch {
+                bentoApiRepository.getAllRestaurants().collectLatest { value: Response<List<RestaurantEntityItem>> ->
+                    when(value){
+                        is Response.Error -> {
+                            _showErrorChannel.send(true)
+                            isLoading = false
+                        }
+
+                        is Response.Success -> {
+                            value.data?.let { restaurants->
+                                _allRestaurantData.update {
+                                    restaurants
+                                }
+                            }
+                            isLoading = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadMenuData(restaurantId: String){
+        if (!isLoading) {
+            isLoading = true
+            viewModelScope.launch {
+                bentoApiRepository.getRestaurantMenu(restaurantId).collectLatest { value: Response<List<MenuItemItem>> ->
+                    when(value){
+                        is Response.Error -> {
+                            _showErrorChannel.send(true)
+                            isLoading = false
+                        }
+
+                        is Response.Success -> {
+                            value.data?.let { menu->
+                                _menuData.update {
+                                    menu
+                                }
+                            }
+                            isLoading = false
+                        }
+                    }
+                }
             }
         }
     }

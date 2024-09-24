@@ -1,7 +1,7 @@
 package com.anubhav_auth.bento.database
 
 import com.anubhav_auth.bento.R
-import com.anubhav_auth.bento.database.entities.AddressTypes
+import com.anubhav_auth.bento.entities.AddressTypes
 
 object IconUtl {
 

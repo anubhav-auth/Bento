@@ -6,7 +6,6 @@ import android.util.Log
 fun saveToLocationShared(context: Context, value: Long) {
     val sharedPreferences =
         context.getSharedPreferences("com.anubhav_auth.bento", Context.MODE_PRIVATE)
-    Log.d("mytag", "$value")
     sharedPreferences
         .edit()
         .putLong("selected_address", value)

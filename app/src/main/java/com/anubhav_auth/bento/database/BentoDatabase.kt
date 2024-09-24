@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.anubhav_auth.bento.database.daos.SavedAddressDAO
-import com.anubhav_auth.bento.database.entities.SavedAddress
+import com.anubhav_auth.bento.entities.SavedAddress
 
 
 @Database(entities = [SavedAddress::class], version = 1)

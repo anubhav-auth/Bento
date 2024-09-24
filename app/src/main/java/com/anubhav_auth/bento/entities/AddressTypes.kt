@@ -1,4 +1,4 @@
-package com.anubhav_auth.bento.database.entities
+package com.anubhav_auth.bento.entities
 
 enum class AddressTypes(val addressType: String) {
     HOME("Home"),

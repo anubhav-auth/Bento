@@ -31,6 +31,7 @@ android {
         }
 
         buildConfigField("String", "maps_api", properties["MAPS_API"] as String)
+        buildConfigField("String", "bento_base", properties["BENTO_BACKEND_BASE_URL"] as String)
         resValue("string", "maps_api", properties["MAPS_API"] as String)
     }
 
@@ -108,5 +109,9 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.moshi:moshi:1.15.1")
+
+//    coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil:2.7.0")
 
 }

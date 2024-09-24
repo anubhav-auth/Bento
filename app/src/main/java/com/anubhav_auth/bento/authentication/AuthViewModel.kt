@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 
 class AuthViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
+
     private val tag = "AUTH"
     private var storedVerificationId: String? = null
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
@@ -28,7 +29,6 @@ class AuthViewModel : ViewModel() {
 
 
     init {
-
         checkAuthStatus()
     }
 
