@@ -66,7 +66,6 @@ fun HomePage(
     val interactionSource = remember {
         MutableInteractionSource()
     }
-    Log.d("mytag", allRestaurants.toString())
 
     LazyColumn(
         modifier = Modifier
@@ -106,19 +105,21 @@ fun HomePage(
             }
         }
         items(allRestaurants) { restaurant ->
-            RestaurantItem(restaurantEntityItem = restaurant, bentoViewModel = bentoViewModel)
+            RestaurantItem(restaurantEntityItem = restaurant, navController = navController)
         }
 
     }
 }
 
 @Composable
-fun RestaurantItem(restaurantEntityItem: RestaurantEntityItem, bentoViewModel: BentoViewModel) {
+fun RestaurantItem(restaurantEntityItem: RestaurantEntityItem, navController: NavController) {
     Row(
         modifier = Modifier
             .padding(vertical = 6.dp, horizontal = 21.dp)
             .fillMaxWidth()
-            .clickable {  }
+            .clickable {
+                navController.navigate("menuPage/${restaurantEntityItem.id}")
+            }
     ) {
         AsyncImage(
             model = restaurantEntityItem.imageUrl,

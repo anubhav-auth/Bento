@@ -1,5 +1,6 @@
 package com.anubhav_auth.bento.viewmodels
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.anubhav_auth.bento.entities.placesData.Result
@@ -10,4 +11,7 @@ class SharedStateViewModel : ViewModel() {
     var selectedAddressIndex = mutableStateOf(0)
     var searchedAddress = mutableStateOf<Result?>(null)
     var currentlyActiveSavedAddress = mutableStateOf(-1)
+
+    var cartItems = mutableStateListOf<String>()
+
 }

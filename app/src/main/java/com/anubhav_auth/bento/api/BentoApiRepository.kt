@@ -1,9 +1,8 @@
 package com.anubhav_auth.bento.api
 
 import com.anubhav_auth.bento.BuildConfig
-import com.anubhav_auth.bento.entities.backendRecieved.menuEntity.MenuItemItem
+import com.anubhav_auth.bento.entities.backendRecieved.menuEntity.MenuItem
 import com.anubhav_auth.bento.entities.backendRecieved.restaurantEntity.RestaurantEntityItem
-import com.anubhav_auth.bento.entities.backendRecieved.restaurantEntity.Restaurants
 import com.anubhav_auth.bento.entities.geocodeData.GeocodeData
 import com.anubhav_auth.bento.entities.placesData.PlacesData
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +19,8 @@ interface BentoApiRepository {
         apiKey: String = BuildConfig.maps_api
     ): Flow<Response<GeocodeData>>
 
-    suspend fun getAllRestaurants():Flow<Response<List<RestaurantEntityItem>>>
-    suspend fun getRestaurantMenu(restaurantId:String):Flow<Response<List<MenuItemItem>>>
+    suspend fun getAllRestaurants(): Flow<Response<List<RestaurantEntityItem>>>
+    suspend fun getRestaurant(restaurantId: String): Flow<Response<RestaurantEntityItem>>
+    suspend fun getRestaurantMenu(restaurantId: String): Flow<Response<List<MenuItem>>>
+    suspend fun getCartItems(ids:List<String>):Flow<Response<List<MenuItem>>>
 }

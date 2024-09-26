@@ -45,7 +45,9 @@ import com.anubhav_auth.bento.location.GrantLocationMode
 import com.anubhav_auth.bento.location.LocationViewmodel
 import com.anubhav_auth.bento.location.MarkerLocation
 import com.anubhav_auth.bento.location.SheetSearch
+import com.anubhav_auth.bento.userInterface.CartPage
 import com.anubhav_auth.bento.userInterface.HomePage
+import com.anubhav_auth.bento.userInterface.MenuPage
 import com.anubhav_auth.bento.userInterface.onboarding.OnboardingScreen
 import com.anubhav_auth.bento.viewmodels.BentoViewModel
 import com.anubhav_auth.bento.viewmodels.SharedStateViewModel
@@ -195,15 +197,6 @@ class MainActivity : ComponentActivity() {
                                 navController = navController
                             )
                         }
-                        composable("homePage") {
-                            HomePage(
-                                sharedStateViewModel,
-                                localDatabaseViewModel,
-                                scope,
-                                bentoViewModel,
-                                navController
-                            )
-                        }
                         composable("sheetSearch") {
                             SheetSearch(
                                 scope = scope,
@@ -213,6 +206,22 @@ class MainActivity : ComponentActivity() {
                                 localDatabaseViewModel = localDatabaseViewModel,
                                 navController = navController
                             )
+                        }
+                        composable("homePage") {
+                            HomePage(
+                                sharedStateViewModel,
+                                localDatabaseViewModel,
+                                scope,
+                                bentoViewModel,
+                                navController
+                            )
+                        }
+                        composable("menuPage/{restroid}"){
+                            val restriID = it.arguments?.getString("restroid")?:""
+                            MenuPage(bentoViewModel = bentoViewModel, sharedStateViewModel = sharedStateViewModel, scope = scope, restroId = restriID, navController = navController)
+                        }
+                        composable("cartPage"){
+                            CartPage(sharedStateViewModel = sharedStateViewModel, bentoViewModel = bentoViewModel)
                         }
                     }
                 }
