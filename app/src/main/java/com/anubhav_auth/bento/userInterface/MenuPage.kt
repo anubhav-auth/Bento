@@ -61,6 +61,7 @@ fun MenuPage(
     val restroDetails by bentoViewModel.restaurantData.collectAsState()
     val menuItems by bentoViewModel.menuData.collectAsState()
 
+
     Scaffold(
         floatingActionButton = {
             if (sharedStateViewModel.cartItems.isNotEmpty()) {

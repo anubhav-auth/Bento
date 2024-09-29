@@ -216,12 +216,23 @@ class MainActivity : ComponentActivity() {
                                 navController
                             )
                         }
-                        composable("menuPage/{restroid}"){
-                            val restriID = it.arguments?.getString("restroid")?:""
-                            MenuPage(bentoViewModel = bentoViewModel, sharedStateViewModel = sharedStateViewModel, scope = scope, restroId = restriID, navController = navController)
+                        composable("menuPage/{restroid}") {
+                            val restriID = it.arguments?.getString("restroid") ?: ""
+                            MenuPage(
+                                bentoViewModel = bentoViewModel,
+                                sharedStateViewModel = sharedStateViewModel,
+                                scope = scope,
+                                restroId = restriID,
+                                navController = navController
+                            )
                         }
-                        composable("cartPage"){
-                            CartPage(sharedStateViewModel = sharedStateViewModel, bentoViewModel = bentoViewModel)
+                        composable("cartPage") {
+                            CartPage(
+                                sharedStateViewModel = sharedStateViewModel,
+                                bentoViewModel = bentoViewModel,
+                                localDatabaseViewModel = localDatabaseViewModel,
+                                navController = navController
+                            )
                         }
                     }
                 }
