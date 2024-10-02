@@ -25,7 +25,7 @@ https://github.com/user-attachments/assets/130b0265-e1aa-40b1-959b-a845ce3a1d8c
 * [![Kotlin][Kotlin]][Kotlin-url] with [![Jetpack Compose][JetpackCompose]][JetpackCompose-url] for the Android client app.
 * [![Retrofit][Retrofit]][Retrofit-url] for API calls.
 
-### Backend:
+### Backend: [Go to backend code](https://github.com/anubhav-auth/Bento-backend)
 * [![Spring Boot][SpringBoot]][SpringBoot-url] to power the API.
 * [![MongoDB][MongoDB]][MongoDB-url] for database storage.
 * [![Docker][Docker]][Docker-url] for containerization, hosted on **Render**.
